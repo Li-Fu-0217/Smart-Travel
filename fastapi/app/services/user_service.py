@@ -16,6 +16,10 @@ def to_vo(user: SysUser) -> UserVO:
         username=user.username,
         role=user.role,
         status=user.status,
+        nickname=user.nickname,
+        email=user.email,
+        phone=user.phone,
+        avatar=user.avatar,
         create_time=user.create_time,
         update_time=user.update_time,
     )
