@@ -1,0 +1,25 @@
+# 环境变量与密钥（含数据库密码，绝不入库）
+.env
+
+# 操作记录（本地维护，不进 git 仓库）
+ai操作记录.md
+
+# 施工依据（本地维护，不进 git 仓库，不公开 AI 协作痕迹）
+docs/施工规范.md
+
+# Python
+.venv/
+__pycache__/
+.mypy_cache/
+
+# Node
+node_modules/
+
+# 运行时生成目录
+uploads/
+
+# 向量库目录（仅忽略 chroma；knowledge_seed 语料需提交，勿忽略整个 data/）
+data/chroma/
+
+# IDE
+.idea/
