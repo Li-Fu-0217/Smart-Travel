@@ -22,6 +22,10 @@ let lastError = { msg: '', ts: 0 }
 // 响应拦截：剥壳 {code, message, data}
 request.interceptors.response.use(
   (response) => {
+    // 文件下载（blob）绕过剥壳，直接返回 blob
+    if (response.config.responseType === 'blob') {
+      return response.data
+    }
     const { code, message, data } = response.data || {}
     if (code === 200) {
       return data
@@ -61,6 +65,11 @@ function showError(msg) {
   }
   lastError = { msg, ts: now }
   ElMessage.error(msg)
+}
+
+// 文件下载（blob）：返回 Blob，供 file.js 的 download/preview 使用
+export function downloadFile(url, params) {
+  return request.get(url, { params, responseType: 'blob' })
 }
 
 export default request

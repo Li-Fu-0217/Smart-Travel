@@ -1,4 +1,5 @@
 // 认证接口
+// 覆盖端点：GET /auth/captcha、POST /auth/login、POST /auth/register、GET /auth/me
 import request from '../utils/request'
 
 export function getCaptcha() {

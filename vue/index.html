@@ -9,7 +9,8 @@
       (function () {
         var t = localStorage.getItem('travel-assistant-theme')
         if (!t || !/^(sunset|ocean|forest)-(light|dark)$/.test(t)) {
-          t = 'sunset-light'
+          // 按端区分默认（§7.9.2）：后台「海蓝·暗」，前台「暖砂·亮」
+          t = location.pathname.indexOf('/admin') === 0 ? 'ocean-dark' : 'sunset-light'
         }
         document.documentElement.setAttribute('data-theme', t)
       })()

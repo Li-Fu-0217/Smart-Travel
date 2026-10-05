@@ -7,6 +7,7 @@
           {{ n.name }}
         </router-link>
       </nav>
+      <ThemeSwitcher />
       <div class="logout" @click="handleLogout">退出</div>
     </header>
     <main class="content">
@@ -19,6 +20,7 @@
 import { useRouter } from 'vue-router'
 import { FRONT_NAV } from '../config/frontNav'
 import { useUserStore } from '../store/user'
+import ThemeSwitcher from '../components/ThemeSwitcher.vue'
 
 const router = useRouter()
 const userStore = useUserStore()

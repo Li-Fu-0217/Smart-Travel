@@ -1,7 +1,8 @@
 // 动态路由（见施工规范 §7.2）：登录后按菜单 addRoute，登出移除
 import { getMenus } from '../api/menu'
+import { routeMap } from './routeMap'
 
-const placeholder = () => import('../views/common/PagePlaceholder.vue')
+const fallback = () => import('../views/common/PagePlaceholder.vue')
 
 export async function setupDynamicRoutes(router, userStore) {
   if (!userStore.isAdmin) return
@@ -12,7 +13,7 @@ export async function setupDynamicRoutes(router, userStore) {
     router.addRoute('AdminLayout', {
       path: childPath,
       name: 'menu-' + m.id,
-      component: placeholder,
+      component: routeMap[m.path] || fallback,
       meta: { title: m.name },
     })
   }

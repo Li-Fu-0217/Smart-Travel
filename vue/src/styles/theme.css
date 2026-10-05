@@ -28,8 +28,35 @@
   --line:#262C36; --ok:#6BA878; --warn:#D6A34A; --danger:#D06A5F;
 }
 
-/* ===== 字体与字号（见 §7.9.5）===== */
+/* ===== 字体与字阶（见 §7.9.5）===== */
 :root {
   --font-serif: Georgia, "Songti SC", "Noto Serif SC", serif;
   --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+
+  /* 字阶（默认后台值，前台在 [data-scope="front"] 覆盖） */
+  --fs-h1: 20px; --fs-h2: 16px; --fs-h3: 14px;
+  --fs-body: 14px; --fs-aux: 13px; --fs-caption: 12px;
+
+  /* 圆角（§7.9.6，默认后台） */
+  --r-card: 8px; --r-card-lg: 18px;
+  --r-btn: 6px; --r-btn-pill: 999px;
+  --r-badge: 4px;
+
+  /* 间距节奏（§7.9.6，默认后台） */
+  --sp-card-inner: 14px; --sp-card-gap: 10px;
+  --sp-section: 20px; --sp-table-row: 44px;
+  --min-tap: 44px;
+}
+
+/* 前台字阶/圆角/间距覆盖（§7.9.5/7.9.6，前台比后台大一档） */
+[data-scope="front"] {
+  --fs-h1: 28px; --fs-h2: 22px; --fs-h3: 18px;
+  --fs-body: 15px; --fs-aux: 13px; --fs-caption: 11.5px;
+  --r-card: 14px; --r-btn: 10px; --r-badge: 999px;
+  --sp-card-inner: 16px; --sp-card-gap: 12px; --sp-section: 28px;
+}
+
+/* 无障碍：减少动态偏好（§7.9.9） */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
 }
