@@ -1,0 +1,35 @@
+/* 视觉规范 token（见施工规范 §7.9）。
+   data-theme 在 <html>，data-scope 在 layout 根（front=前台 / admin=后台）。
+   页面里禁止写裸色值/裸字号/裸间距，一律引用这些变量。 */
+
+/* ===== 主题 accent（全局，3 色相 × 亮/暗）===== */
+[data-theme="sunset-light"] { --accent: #E85D2A; --accent-ink: #FFFFFF; }
+[data-theme="sunset-dark"]  { --accent: #F0874F; --accent-ink: #14110F; }
+[data-theme="ocean-light"]  { --accent: #1B6CA8; --accent-ink: #FFFFFF; }
+[data-theme="ocean-dark"]   { --accent: #4FA3D8; --accent-ink: #14110F; }
+[data-theme="forest-light"] { --accent: #5A6E4A; --accent-ink: #FFFFFF; }
+[data-theme="forest-dark"]  { --accent: #8FA87A; --accent-ink: #14110F; }
+
+/* ===== 前台 scope（旅行杂志，带色相暖底）===== */
+[data-theme="sunset-light"] [data-scope="front"] { --bg:#F5EFE6; --surface:#FFFFFF; --surface-2:#EDE4D6; --ink:#14110F; --muted:#6B6259; --line:#E2D8C9; --ok:#4F8A5B; --warn:#C98A1E; --danger:#C0453B; }
+[data-theme="sunset-dark"] [data-scope="front"]  { --bg:#14110F; --surface:#1E1A17; --surface-2:#2A2420; --ink:#F5EFE6; --muted:#A79E93; --line:#332C27; --ok:#6BA878; --warn:#D6A34A; --danger:#D06A5F; }
+[data-theme="ocean-light"] [data-scope="front"]  { --bg:#F2F6F8; --surface:#FFFFFF; --surface-2:#E4EDF2; --ink:#14110F; --muted:#6B6259; --line:#DCE6EC; --ok:#4F8A5B; --warn:#C98A1E; --danger:#C0453B; }
+[data-theme="ocean-dark"] [data-scope="front"]   { --bg:#0E1418; --surface:#161E24; --surface-2:#1E2830; --ink:#E8EDF5; --muted:#8B96A8; --line:#262C36; --ok:#6BA878; --warn:#D6A34A; --danger:#D06A5F; }
+[data-theme="forest-light"] [data-scope="front"] { --bg:#F4F6F0; --surface:#FFFFFF; --surface-2:#E9EDE0; --ink:#14110F; --muted:#6B6259; --line:#DDE4D3; --ok:#4F8A5B; --warn:#C98A1E; --danger:#C0453B; }
+[data-theme="forest-dark"] [data-scope="front"]  { --bg:#121510; --surface:#1A1E18; --surface-2:#23281F; --ink:#E8EDF5; --muted:#8B96A8; --line:#2A3024; --ok:#6BA878; --warn:#D6A34A; --danger:#D06A5F; }
+
+/* ===== 后台 scope（行程工具，中性底，accent 随主题）===== */
+[data-scope="admin"] {
+  --bg:#F7F8FA; --surface:#FFFFFF; --surface-2:#F0F2F5; --ink:#14171C; --muted:#6B7280;
+  --line:#E4E7EC; --ok:#4F8A5B; --warn:#C98A1E; --danger:#C0453B;
+}
+[data-theme$="-dark"] [data-scope="admin"] {
+  --bg:#0F1115; --surface:#161A21; --surface-2:#1E232B; --ink:#E8EDF5; --muted:#8B96A8;
+  --line:#262C36; --ok:#6BA878; --warn:#D6A34A; --danger:#D06A5F;
+}
+
+/* ===== 字体与字号（见 §7.9.5）===== */
+:root {
+  --font-serif: Georgia, "Songti SC", "Noto Serif SC", serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+}

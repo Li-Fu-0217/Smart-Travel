@@ -1,0 +1,30 @@
+/* 全局基础样式 */
+* { box-sizing: border-box; }
+
+html, body, #app {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans, sans-serif);
+  color: var(--ink, #14110F);
+  background: var(--bg, #F5EFE6);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* 易用性优先：≥44px 点击区域 */
+button, .clickable {
+  min-height: 44px;
+}
+
+/* 尊重 reduced-motion（见 §7.9.9） */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

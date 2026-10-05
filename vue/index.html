@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>智慧旅游智能助手</title>
+    <script>
+      // 首屏设置主题，避免闪烁（见 §7.9.2）
+      (function () {
+        var t = localStorage.getItem('travel-assistant-theme')
+        if (!t || !/^(sunset|ocean|forest)-(light|dark)$/.test(t)) {
+          t = 'sunset-light'
+        }
+        document.documentElement.setAttribute('data-theme', t)
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
