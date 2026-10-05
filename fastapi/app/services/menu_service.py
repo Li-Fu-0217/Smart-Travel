@@ -22,8 +22,10 @@ def to_vo(menu: SysMenu) -> MenuVO:
     )
 
 
-def list_menus(db: Session) -> List[MenuVO]:
+def list_menus(db: Session, role: str = None) -> List[MenuVO]:
     menus = db.exec(select(SysMenu).order_by(SysMenu.sort_order)).all()
+    if role:
+        menus = [m for m in menus if role in (m.roles or "").split(",")]
     return [to_vo(m) for m in menus]
 
 

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
 
 from app.common.result import Result
-from app.core.deps import get_db, operation_log, require_admin
+from app.core.deps import get_current_user, get_db, operation_log, require_admin
 from app.schemas.menu import MenuCreateRequest, MenuUpdateRequest
 from app.services import menu_service
 
@@ -13,8 +13,8 @@ router = APIRouter(prefix="/menus", tags=["菜单"])
 
 
 @router.get("")
-def list_menus(current_user=Depends(require_admin), db: Session = Depends(get_db)):
-    return Result(data=menu_service.list_menus(db))
+def list_menus(current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    return Result(data=menu_service.list_menus(db, current_user.role))
 
 
 @router.get("/manage")
