@@ -1,7 +1,7 @@
 """API 路由汇总，前缀 /api（见施工规范 §3、§4.5）。"""
 from fastapi import APIRouter
 
-from app.api import auth, files, logs, menus, profile, roles, users
+from app.api import auth, family, files, logs, menus, profile, roles, travelers, users
 
 api_router = APIRouter(prefix="/api")
 api_router.include_router(auth.router)
@@ -11,3 +11,6 @@ api_router.include_router(users.router)
 api_router.include_router(logs.router)
 api_router.include_router(profile.router)
 api_router.include_router(files.router)
+api_router.include_router(travelers.router)
+api_router.include_router(family.router)
+api_router.include_router(family.admin_router)
