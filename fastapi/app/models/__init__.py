@@ -73,3 +73,7 @@ class SysOperationLog(SQLModel, table=True):
     cost_ms: Optional[int] = None
     status: int = 1
     create_time: datetime = Field(default_factory=datetime.now)
+
+
+# 业务表（17 张）映射，见 models/travel.py（阶段 3）
+from app.models.travel import *  # noqa: E402, F401
