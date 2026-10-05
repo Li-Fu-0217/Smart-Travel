@@ -1,10 +1,7 @@
 """认证出入参（见施工规范 §4.5）。"""
-from datetime import datetime
-from typing import Optional
+from pydantic import Field
 
-from pydantic import Field, field_serializer
-
-from app.common.result import CamelModel
+from app.common.result import CamelModel, DateTimeStr
 
 
 class CaptchaResponse(CamelModel):
@@ -31,12 +28,8 @@ class UserVO(CamelModel):
     username: str
     role: str
     status: int
-    create_time: Optional[datetime] = None
-    update_time: Optional[datetime] = None
-
-    @field_serializer("create_time", "update_time")
-    def _fmt_dt(self, v, _info):
-        return v.strftime("%Y-%m-%d %H:%M:%S") if v else None
+    create_time: DateTimeStr | None = None
+    update_time: DateTimeStr | None = None
 
 
 class LoginResponse(CamelModel):
