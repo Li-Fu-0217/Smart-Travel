@@ -17,6 +17,10 @@ class SysUser(SQLModel, table=True):
     password: str
     role: str = "USER"
     status: int = 1
+    nickname: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    avatar: Optional[str] = None
     create_time: datetime = Field(default_factory=datetime.now)
     update_time: datetime = Field(default_factory=datetime.now, sa_column_kwargs={"onupdate": datetime.now})
 

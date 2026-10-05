@@ -28,6 +28,10 @@ class UserVO(CamelModel):
     username: str
     role: str
     status: int
+    nickname: str | None = None
+    email: str | None = None
+    phone: str | None = None
+    avatar: str | None = None
     create_time: DateTimeStr | None = None
     update_time: DateTimeStr | None = None
 
