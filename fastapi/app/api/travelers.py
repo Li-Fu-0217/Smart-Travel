@@ -4,8 +4,8 @@ from sqlmodel import Session
 
 from app.common.result import PageResult, Result
 from app.core.deps import get_current_user, get_db, operation_log
-from app.schemas.traveler import TravelerCreateRequest, TravelerUpdateRequest
-from app.services import traveler_service
+from app.schemas.traveler import PreferenceUpdateRequest, TravelerCreateRequest, TravelerUpdateRequest
+from app.services import preference_service, traveler_service
 
 router = APIRouter(prefix="/travelers", tags=["旅行者档案"])
 
@@ -49,3 +49,15 @@ def update_traveler(traveler_id: int, payload: TravelerUpdateRequest, request: R
 def delete_traveler(traveler_id: int, request: Request, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
     traveler_service.delete_traveler(db, current_user, traveler_id)
     return Result()
+
+
+@router.post("/{traveler_id}/preferences/distill")
+@operation_log("旅行者档案", "偏好提炼")
+def distill(traveler_id: int, request: Request, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    return Result(data=preference_service.distill(db, current_user, traveler_id))
+
+
+@router.put("/{traveler_id}/preferences")
+@operation_log("旅行者档案", "修改偏好标签")
+def update_preferences(traveler_id: int, payload: PreferenceUpdateRequest, request: Request, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    return Result(data=preference_service.update_preferences(db, current_user, traveler_id, payload.tags))

@@ -1,8 +1,10 @@
 """旅行者档案出入参（见施工规范 §4.5、§5.2）。"""
 from datetime import date
+from typing import List
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
+from app.common.constants import PREFERENCE_TAGS
 from app.common.result import CamelModel, DateTimeStr
 
 
@@ -68,3 +70,15 @@ class TravelerProfileVO(CamelModel):
     status: int = 1
     create_time: DateTimeStr | None = None
     update_time: DateTimeStr | None = None
+
+
+class PreferenceUpdateRequest(CamelModel):
+    tags: List[str] = []
+
+    @field_validator("tags")
+    @classmethod
+    def _check_tags(cls, v: List[str]) -> List[str]:
+        for tag in v:
+            if tag not in PREFERENCE_TAGS:
+                raise ValueError("偏好标签不合法")
+        return v
