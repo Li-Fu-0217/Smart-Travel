@@ -1,4 +1,4 @@
-# sqlmodel 与 bcrypt 必须精确钉死（见施工规范 §2：新版 sqlmodel 导致写库时区错误、bcrypt 新版与 passlib 1.7.4 不兼容）
+# sqlmodel==0.0.22 and bcrypt==4.0.1 MUST stay pinned (spec sec.2): newer sqlmodel breaks naive datetime, newer bcrypt breaks passlib 1.7.4
 sqlmodel==0.0.22
 bcrypt==4.0.1
 
