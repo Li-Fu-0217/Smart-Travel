@@ -16,10 +16,10 @@ __pycache__/
 node_modules/
 
 # 运行时生成目录
-uploads/
+fastapi/uploads/
 
 # 向量库目录（仅忽略 chroma；knowledge_seed 语料需提交，勿忽略整个 data/）
-data/chroma/
+fastapi/data/chroma/
 
 # IDE
 .idea/
