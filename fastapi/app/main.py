@@ -6,6 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 
+from app.api import api_router
 from app.common.exceptions import BusinessException
 from app.common.result import Result
 from app.common.validation import translate_validation_errors
@@ -13,6 +14,7 @@ from app.common.validation import translate_validation_errors
 logger = logging.getLogger("travel_assistant")
 
 app = FastAPI(title="智慧旅游智能助手系统")
+app.include_router(api_router)
 
 
 @app.exception_handler(BusinessException)
