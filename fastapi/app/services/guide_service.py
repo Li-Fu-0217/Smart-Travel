@@ -136,7 +136,7 @@ def list_documents(db: Session, current: int, size: int, keyword: str) -> tuple[
     stmt = select(GuideDocument)
     count_stmt = select(func.count(GuideDocument.id))
     if keyword:
-        cond = GuideDocument.title.contains(keyword)
+        cond = GuideDocument.title.contains(keyword) | GuideDocument.destination.contains(keyword)
         stmt = stmt.where(cond)
         count_stmt = count_stmt.where(cond)
     total = db.exec(count_stmt).one()

@@ -201,7 +201,7 @@ def admin_list_templates(db: Session, current: int, size: int, keyword: str) -> 
     stmt = select(TripTemplate)
     count_stmt = select(func.count(TripTemplate.id))
     if keyword:
-        cond = TripTemplate.title.contains(keyword)
+        cond = TripTemplate.title.contains(keyword) | TripTemplate.destination.contains(keyword)
         stmt = stmt.where(cond)
         count_stmt = count_stmt.where(cond)
     total = db.exec(count_stmt).one()

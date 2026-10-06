@@ -99,7 +99,7 @@ def admin_list_tours(db: Session, current: int, size: int, keyword: str) -> tupl
     stmt = select(GroupTour)
     count_stmt = select(func.count(GroupTour.id))
     if keyword:
-        cond = GroupTour.title.contains(keyword)
+        cond = GroupTour.title.contains(keyword) | GroupTour.destination.contains(keyword)
         stmt = stmt.where(cond)
         count_stmt = count_stmt.where(cond)
     total = db.exec(count_stmt).one()

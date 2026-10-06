@@ -52,7 +52,7 @@ def list_users(db: Session, current: int, size: int, keyword: str) -> tuple[List
     stmt = select(SysUser)
     count_stmt = select(func.count(SysUser.id))
     if keyword:
-        cond = SysUser.username.contains(keyword)
+        cond = SysUser.username.contains(keyword) | SysUser.nickname.contains(keyword)
         stmt = stmt.where(cond)
         count_stmt = count_stmt.where(cond)
     total = db.exec(count_stmt).one()

@@ -72,12 +72,16 @@ def list_alerts(db: Session, user: SysUser, current: int, size: int, status: str
     return [to_vo(db, a) for a in alerts], total
 
 
-def admin_list_alerts(db: Session, current: int, size: int, status: str | None) -> tuple[List[AlertVO], int]:
+def admin_list_alerts(db: Session, current: int, size: int, status: str | None, keyword: str) -> tuple[List[AlertVO], int]:
     stmt = select(TravelAlert)
     count_stmt = select(func.count(TravelAlert.id))
     if status:
         stmt = stmt.where(TravelAlert.status == status)
         count_stmt = count_stmt.where(TravelAlert.status == status)
+    if keyword:
+        cond = TravelAlert.message.contains(keyword) | TravelAlert.location.contains(keyword)
+        stmt = stmt.where(cond)
+        count_stmt = count_stmt.where(cond)
     total = db.exec(count_stmt).one()
     alerts = db.exec(stmt.order_by(TravelAlert.id.desc()).offset((current - 1) * size).limit(size)).all()
     return [to_vo(db, a) for a in alerts], total

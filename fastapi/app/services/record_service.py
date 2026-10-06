@@ -82,12 +82,16 @@ def delete_record(db: Session, user: SysUser, record_id: int) -> None:
     db.commit()
 
 
-def admin_list_records(db: Session, current: int, size: int, traveler_id: int | None) -> tuple[List[RecordVO], int]:
+def admin_list_records(db: Session, current: int, size: int, traveler_id: int | None, keyword: str) -> tuple[List[RecordVO], int]:
     stmt = select(TravelRecord)
     count_stmt = select(func.count(TravelRecord.id))
     if traveler_id:
         stmt = stmt.where(TravelRecord.traveler_id == traveler_id)
         count_stmt = count_stmt.where(TravelRecord.traveler_id == traveler_id)
+    if keyword:
+        cond = TravelRecord.destination.contains(keyword) | TravelRecord.content.contains(keyword)
+        stmt = stmt.where(cond)
+        count_stmt = count_stmt.where(cond)
     total = db.exec(count_stmt).one()
     records = db.exec(stmt.order_by(TravelRecord.id.desc()).offset((current - 1) * size).limit(size)).all()
     return [to_vo(db, r) for r in records], total

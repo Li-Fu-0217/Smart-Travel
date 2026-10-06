@@ -34,10 +34,11 @@ def admin_list_alerts(
     current: int = Query(1, ge=1),
     size: int = Query(10, ge=1, le=100),
     status: str | None = Query(None),
+    keyword: str = Query(""),
     current_user=Depends(require_admin),
     db: Session = Depends(get_db),
 ):
-    records, total = alert_service.admin_list_alerts(db, current, size, status)
+    records, total = alert_service.admin_list_alerts(db, current, size, status, keyword)
     return Result(data=PageResult(records=records, total=total, current=current, size=size))
 
 

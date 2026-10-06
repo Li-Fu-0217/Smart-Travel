@@ -93,7 +93,7 @@ def admin_list_catalog(db: Session, current: int, size: int, keyword: str) -> tu
     stmt = select(BookingCatalog)
     count_stmt = select(func.count(BookingCatalog.id))
     if keyword:
-        cond = BookingCatalog.name.contains(keyword)
+        cond = BookingCatalog.name.contains(keyword) | BookingCatalog.description.contains(keyword)
         stmt = stmt.where(cond)
         count_stmt = count_stmt.where(cond)
     total = db.exec(count_stmt).one()

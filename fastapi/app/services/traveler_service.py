@@ -64,7 +64,9 @@ def list_travelers(db: Session, user: SysUser, current: int, size: int, keyword:
         stmt = stmt.where(TravelerProfile.id.in_(ids))
         count_stmt = count_stmt.where(TravelerProfile.id.in_(ids))
     if keyword:
-        cond = TravelerProfile.name.contains(keyword)
+        cond = (TravelerProfile.name.contains(keyword)
+                | TravelerProfile.phone.contains(keyword)
+                | TravelerProfile.preference_tags.contains(keyword))
         stmt = stmt.where(cond)
         count_stmt = count_stmt.where(cond)
     total = db.exec(count_stmt).one()

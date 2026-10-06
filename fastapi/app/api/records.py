@@ -46,8 +46,9 @@ def admin_list_records(
     current: int = Query(1, ge=1),
     size: int = Query(10, ge=1, le=100),
     traveler_id: int | None = Query(None, alias="travelerId"),
+    keyword: str = Query(""),
     current_user=Depends(require_admin),
     db: Session = Depends(get_db),
 ):
-    records, total = record_service.admin_list_records(db, current, size, traveler_id)
+    records, total = record_service.admin_list_records(db, current, size, traveler_id, keyword)
     return Result(data=PageResult(records=records, total=total, current=current, size=size))

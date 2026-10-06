@@ -82,3 +82,39 @@
   --el-color-danger: var(--danger);
   --el-color-error: var(--danger);
 }
+
+/* ===== Element Plus 中性变量映射（§7.9.11 补全，硬性）=====
+   深色主题下表格/分页/弹窗仍是白底，根因是 EP 自带的中性变量没跟随 token。
+   必须写进 scope 块（不能写 :root —— --surface/--ink/--line 只在 scope 下定义），
+   EP 组件（含 teleport 到 body 的 dialog/select 下拉）挂在 body 下，能继承到。 */
+[data-scope="front"] {
+  --el-bg-color: var(--bg);
+  --el-bg-color-overlay: var(--surface);
+  --el-fill-color: var(--surface-2);
+  --el-fill-color-light: var(--surface-2);
+  --el-fill-color-blank: var(--surface);
+  --el-text-color-primary: var(--ink);
+  --el-text-color-regular: var(--ink);
+  --el-text-color-secondary: var(--muted);
+  --el-text-color-placeholder: var(--muted);
+  --el-border-color: var(--line);
+  --el-border-color-light: var(--line);
+  --el-border-color-lighter: var(--line);
+  --el-disabled-bg-color: var(--surface-2);
+}
+
+[data-scope="admin"] {
+  --el-bg-color: var(--bg);
+  --el-bg-color-overlay: var(--surface);
+  --el-fill-color: var(--surface-2);
+  --el-fill-color-light: var(--surface-2);
+  --el-fill-color-blank: var(--surface);
+  --el-text-color-primary: var(--ink);
+  --el-text-color-regular: var(--ink);
+  --el-text-color-secondary: var(--muted);
+  --el-text-color-placeholder: var(--muted);
+  --el-border-color: var(--line);
+  --el-border-color-light: var(--line);
+  --el-border-color-lighter: var(--line);
+  --el-disabled-bg-color: var(--surface-2);
+}
