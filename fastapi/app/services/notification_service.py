@@ -5,7 +5,7 @@ from typing import List, Optional
 from sqlmodel import Session, func, select
 
 from app.common.exceptions import BusinessException
-from app.models import NotifyInbox, SysUser
+from app.models import FamilyMember, NotifyInbox, SysUser
 from app.schemas.notification import NotificationVO
 
 logger = logging.getLogger(__name__)
@@ -88,3 +88,13 @@ def push(
     db.commit()
     db.refresh(n)
     return n
+
+
+def notify_companions(db: Session, traveler_id: int, content: str, source: str = "agent") -> dict:
+    """向该旅行者的绑定联系人发送站内消息（§6.2 工具 5）。无绑定时通知数为 0。"""
+    uids = db.exec(
+        select(FamilyMember.user_id).where(FamilyMember.traveler_id == traveler_id)
+    ).all()
+    for uid in uids:
+        push(db, uid, traveler_id, "同行人通知", content, "agent_notify", source)
+    return {"notified_count": len(uids)}

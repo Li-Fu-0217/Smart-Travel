@@ -9,6 +9,7 @@ from typing import List, Optional
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, func, select
 
+from app.common.constants import SOURCES
 from app.common.exceptions import BusinessException
 from app.models import BookingCatalog, BookingOrder, FamilyMember, SysUser
 from app.schemas.booking import (
@@ -175,7 +176,10 @@ def slots(db: Session, item_type: Optional[str], days: int) -> List[BookingSlotV
 
 # —— orders ——
 
-def create_order(db: Session, user: SysUser, payload: BookingOrderCreateRequest) -> BookingOrderVO:
+def create_order(db: Session, user: SysUser, payload: BookingOrderCreateRequest, source: str = "manual") -> BookingOrderVO:
+    # source 值域 §5.8：manual（人工）/ agent（智能助手）/ system（系统）。默认 manual 保持人工下单现行为。
+    if source not in SOURCES:
+        raise BusinessException("来源不合法", code=400)
     assert_family_access(db, user, payload.traveler_id)
     catalog = db.get(BookingCatalog, payload.catalog_id)
     if catalog is None or catalog.status != 1:
@@ -188,7 +192,7 @@ def create_order(db: Session, user: SysUser, payload: BookingOrderCreateRequest)
         booking_time=datetime.now(),
         guest_count=payload.guest_count,
         status="pending",
-        source="manual",
+        source=source,
         slot_lock=slot_lock,
         version=0,
         remark=payload.remark,
