@@ -82,7 +82,8 @@ async function load() {
   const od = await getOrders({ current: 1, size: 5 })
   recentBookings.value = od.records
   const tp = await getTrips({ current: 1, size: 50 })
-  ongoingTrips.value = tp.records.filter((t) => t.status === 1)
+  const todayStr = new Date().toISOString().slice(0, 10)
+  ongoingTrips.value = tp.records.filter((t) => t.startDate <= todayStr && t.endDate >= todayStr)
 
   const overdueAll = []
   for (const t of travelers.value) {

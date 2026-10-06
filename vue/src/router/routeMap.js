@@ -12,7 +12,7 @@ export const routeMap = {
   '/admin/bookings': () => import('../views/admin/BookingList.vue'),
   '/admin/groups': () => import('../views/admin/GroupTourList.vue'),
   '/admin/alerts': () => import('../views/admin/AlertList.vue'),
-  '/admin/guides': placeholder,      // 阶段 5
+  '/admin/guides': () => import('../views/admin/GuideList.vue'),
   '/admin/records': () => import('../views/admin/RecordList.vue'),
   '/admin/agent-tools': placeholder, // 阶段 6
   '/admin/agent-logs': placeholder,  // 阶段 6
