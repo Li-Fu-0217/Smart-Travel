@@ -40,6 +40,21 @@ jobs:
           python-version: "3.12"
       - name: 安装依赖
         run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: requirements 纯 ASCII 校验（防 GBK locale pip 崩溃）
+        run: |
+          python -c "
+          import pathlib, sys
+          bad = []
+          for p in pathlib.Path('.').glob('requirements*.txt'):
+              try:
+                  p.read_text(encoding='ascii')
+              except UnicodeDecodeError:
+                  bad.append(str(p))
+          if bad:
+              print('NON-ASCII in:', ', '.join(bad))
+              sys.exit(1)
+          print('requirements OK (pure ASCII)')
+          "
       - name: 建测试库
         run: python tests/create_test_db.py
       - name: pytest 连跑两次（守住 F1 的可重复运行）
