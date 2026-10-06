@@ -109,6 +109,8 @@ docker compose up -d --build
 
 ⚠️ 首次启动会在**容器内**执行 `sql/system.sql`（22 张表 DROP + CREATE + 种子），数据存于 `mysql_data` 卷。
 
+**生产部署前必须改 `JWT_SECRET`**（compose 里是 `change-me-in-prod` 占位符）。上传文件存 `uploads_data` 卷、攻略向量库存 `chroma_data` 卷、ONNX 嵌入模型缓存存 `chroma_cache` 卷（首次启动会联网下载约 86MB 的 all-MiniLM-L6-v2；本机若已在 `~/.cache/chroma/onnx_models` 下好，可把 `chroma_cache` 卷换成指向该目录的 bind mount 免重复下载）。
+
 ## 部署要点
 
 - **必须同源反代 `/api`**：静态部署时把 `/api` 反向代理到后端 8000，否则产物里所有接口 404（实测挂静态服务时 `/api/auth/captcha` 就是 404）。

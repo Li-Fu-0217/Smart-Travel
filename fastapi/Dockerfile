@@ -11,6 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY fastapi/app ./app
 COPY fastapi/scripts ./scripts
 COPY sql /sql
+COPY fastapi/data/knowledge_seed ./data/knowledge_seed
 
 EXPOSE 8000
 

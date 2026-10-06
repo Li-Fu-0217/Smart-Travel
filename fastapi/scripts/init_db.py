@@ -32,11 +32,17 @@ def _wait_db() -> None:
 def _init() -> None:
     sql = Path("/sql/system.sql").read_text(encoding="utf-8")
     db = settings.DB_NAME  # travel_assistant_docker
+    # 守卫 1：绝不把建库目标指向宿主机 travel_assistant（用户不可再生数据）
+    if db == "travel_assistant":
+        raise RuntimeError("拒绝把建库目标指向宿主机 travel_assistant")
     sql = sql.replace(
         "CREATE DATABASE IF NOT EXISTS travel_assistant ",
         f"CREATE DATABASE IF NOT EXISTS {db} ",
     )
     sql = sql.replace("USE travel_assistant;", f"USE {db};")
+    # 守卫 2：两处 replace 必须真的生效，否则说明 system.sql 结构变了、没改写干净
+    if "USE travel_assistant;" in sql or f"USE {db};" not in sql:
+        raise RuntimeError("system.sql 库名改写不完整，拒绝建库")
     conn = pymysql.connect(
         host=settings.DB_HOST, port=settings.DB_PORT,
         user=settings.DB_USER, password=settings.DB_PASSWORD, charset="utf8mb4",
