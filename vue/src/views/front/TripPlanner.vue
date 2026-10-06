@@ -16,19 +16,35 @@
             <el-button v-else link @click="undo(t, td)">撤销</el-button>
           </div>
         </div>
+        <el-button link type="primary" class="publish" @click="openPublish(t)">发布为模板</el-button>
       </div>
       <p v-if="!trips.length" class="muted">暂无行程</p>
     </div>
+
+    <el-dialog v-model="pubVisible" title="发布为模板" width="340px">
+      <el-form label-width="80px">
+        <el-form-item label="标题"><el-input v-model="pubForm.title" /></el-form-item>
+        <el-form-item label="描述"><el-input v-model="pubForm.description" type="textarea" /></el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="pubVisible = false">取消</el-button>
+        <el-button type="primary" @click="doPublish">发布</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import { getTrips, getTripTodos } from '../../api/trip'
 import { doneTodo, undoTodo } from '../../api/todo'
+import { publishTemplate } from '../../api/template'
 import StatusBadge from '../../components/StatusBadge.vue'
 
 const trips = ref([])
+const pubVisible = ref(false)
+const pubForm = reactive({ tripId: 0, title: '', description: '' })
 
 function overdue(dueTime) {
   return !!dueTime && new Date(dueTime.replace(' ', 'T')) < new Date()
@@ -53,6 +69,19 @@ async function undo(t, td) {
   load()
 }
 
+function openPublish(t) {
+  pubForm.tripId = t.id
+  pubForm.title = t.title || ''
+  pubForm.description = ''
+  pubVisible.value = true
+}
+
+async function doPublish() {
+  await publishTemplate({ tripId: pubForm.tripId, title: pubForm.title, description: pubForm.description })
+  pubVisible.value = false
+  ElMessage.success('已发布为模板')
+}
+
 onMounted(load)
 </script>
 
@@ -69,5 +98,6 @@ onMounted(load)
 .todo-name { flex: 1; }
 .todo.done .todo-name { text-decoration: line-through; color: var(--muted); }
 .todo.overdue .todo-name { color: var(--danger); }
+.publish { min-height: var(--min-tap); }
 .muted { color: var(--muted); }
 </style>

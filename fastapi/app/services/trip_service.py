@@ -105,9 +105,25 @@ def delete_trip(db: Session, user: SysUser, trip_id: int) -> None:
     db.commit()
 
 
-def today(db: Session, user: SysUser, traveler_id: int) -> Optional[TripTodayVO]:
+def today(db: Session, user: SysUser, traveler_id: int) -> TripTodayVO:
     assert_family_access(db, user, traveler_id)
     today_date = date.today()
+
+    # 逾期待办：无论有无进行中行程都要返回（§4.11 4.2 核实后推翻早退）
+    overdue_todos = db.exec(
+        select(TripTodo)
+        .where(
+            TripTodo.traveler_id == traveler_id,
+            TripTodo.status == 2,
+            TripTodo.due_time < datetime.now(),
+        )
+        .order_by(TripTodo.due_time)
+    ).all()
+    overdue_vos = [
+        TripTodayOverdueItemVO(id=t.id, item_name=t.item_name, due_time=t.due_time, status=t.status)
+        for t in overdue_todos
+    ]
+
     active = db.exec(
         select(TripPlan)
         .where(
@@ -118,8 +134,20 @@ def today(db: Session, user: SysUser, traveler_id: int) -> Optional[TripTodayVO]
         )
         .order_by(TripPlan.start_date)
     ).first()
+
     if active is None:
-        return None
+        return TripTodayVO(
+            trip_id=None,
+            title=None,
+            destination=None,
+            day_index=0,
+            day_count=0,
+            date=today_date,
+            today_todos=[],
+            overdue_todos=overdue_vos,
+            next_days=[],
+            bookings=[],
+        )
 
     day_index = (today_date - active.start_date).days + 1
     day_count = (active.end_date - active.start_date).days + 1
@@ -132,16 +160,6 @@ def today(db: Session, user: SysUser, traveler_id: int) -> Optional[TripTodayVO]
             TripTodo.trip_id == active.id,
             TripTodo.due_time >= today_start,
             TripTodo.due_time < tomorrow_start,
-        )
-        .order_by(TripTodo.due_time)
-    ).all()
-
-    overdue_todos = db.exec(
-        select(TripTodo)
-        .where(
-            TripTodo.traveler_id == traveler_id,
-            TripTodo.status == 2,
-            TripTodo.due_time < datetime.now(),
         )
         .order_by(TripTodo.due_time)
     ).all()
@@ -196,10 +214,7 @@ def today(db: Session, user: SysUser, traveler_id: int) -> Optional[TripTodayVO]
             )
             for t in today_todos
         ],
-        overdue_todos=[
-            TripTodayOverdueItemVO(id=t.id, item_name=t.item_name, due_time=t.due_time, status=t.status)
-            for t in overdue_todos
-        ],
+        overdue_todos=overdue_vos,
         next_days=next_days,
         bookings=booking_vos,
     )

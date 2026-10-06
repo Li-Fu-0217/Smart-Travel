@@ -111,11 +111,11 @@ class TripTodayBookingVO(CamelModel):
 
 
 class TripTodayVO(CamelModel):
-    trip_id: int
+    trip_id: int | None = None
     title: str | None = None
     destination: str | None = None
-    day_index: int
-    day_count: int
+    day_index: int = 0
+    day_count: int = 0
     date: date
     today_todos: List[TripTodayTodoItemVO] = []
     overdue_todos: List[TripTodayOverdueItemVO] = []

@@ -5,7 +5,8 @@
         <el-option v-for="t in travelers" :key="t.id" :label="t.name" :value="t.id" />
       </el-select>
     </div>
-    <div v-if="today" class="today">
+
+    <div v-if="today && today.tripId" class="today">
       <h2 class="title">{{ today.title || '今日行程' }}</h2>
       <div class="meta">{{ today.date }} · 第 {{ today.dayIndex }} 天 / 共 {{ today.dayCount }} 天</div>
       <div class="section">
@@ -15,27 +16,37 @@
         </div>
         <p v-if="!today.todayTodos.length" class="muted">今天没有安排</p>
       </div>
-      <div class="section overdue">
-        <div class="section-title">已逾期待办</div>
-        <div v-for="td in today.overdueTodos" :key="td.id" class="item"><span>{{ td.itemName }}</span><span class="muted">{{ td.dueTime }}</span></div>
-        <p v-if="!today.overdueTodos.length" class="muted">无逾期</p>
-      </div>
       <div class="section">
         <div class="section-title">接下来</div>
         <div v-for="d in today.nextDays" :key="d.date" class="item"><span class="muted">{{ d.date }}</span><span>{{ (d.items || []).join('、') }}</span></div>
       </div>
+      <div class="section">
+        <div class="section-title">相关预约</div>
+        <div v-for="b in today.bookings" :key="b.id" class="item"><span>{{ b.catalogName }}</span><span class="muted">{{ b.bookingTime }}</span></div>
+        <p v-if="!today.bookings.length" class="muted">无预约</p>
+      </div>
     </div>
-    <p v-else class="muted">今天没有进行中的行程</p>
+    <div v-else class="empty">
+      <p class="muted">今天没有进行中的行程</p>
+      <el-button type="primary" @click="askAgent">让智能助手帮我安排今天</el-button>
+    </div>
+
+    <div v-if="today" class="section overdue">
+      <div class="section-title">已逾期待办</div>
+      <div v-for="td in today.overdueTodos" :key="td.id" class="item"><span>{{ td.itemName }}</span><span class="muted">{{ td.dueTime }}</span></div>
+      <p v-if="!today.overdueTodos.length" class="muted">无逾期</p>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { getMyTravelers } from '../../api/family'
 import { getTripToday } from '../../api/trip'
 
 const route = useRoute()
+const router = useRouter()
 const travelers = ref([])
 const travelerId = ref(Number(route.query.travelerId) || 0)
 const today = ref(null)
@@ -50,6 +61,10 @@ async function loadTravelers() {
 async function load() {
   if (!travelerId.value) return
   today.value = await getTripToday(travelerId.value)
+}
+
+function askAgent() {
+  router.push(`/user/chat?q=${encodeURIComponent('帮我安排今天')}`)
 }
 
 onMounted(async () => { await loadTravelers(); await load() })
@@ -68,4 +83,5 @@ onMounted(async () => { await loadTravelers(); await load() })
 .item { display: flex; gap: var(--sp-card-gap); min-height: var(--min-tap); align-items: center; }
 .time { color: var(--accent); width: 60px; }
 .muted { color: var(--muted); }
+.empty { display: flex; flex-direction: column; gap: var(--sp-card-gap); align-items: flex-start; }
 </style>
