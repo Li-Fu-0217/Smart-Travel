@@ -97,11 +97,14 @@ def admin_list_records(db: Session, current: int, size: int, traveler_id: int | 
                 | TravelerProfile.name.contains(keyword))
         stmt = stmt.where(cond)
         count_stmt = count_stmt.where(cond)
-    if rating:
+    if rating is not None:
         stmt = stmt.where(TravelRecord.rating == rating)
         count_stmt = count_stmt.where(TravelRecord.rating == rating)
     if visited_date:
-        d = date.fromisoformat(visited_date)
+        try:
+            d = date.fromisoformat(visited_date)
+        except ValueError:
+            raise BusinessException("到访日期格式应为 YYYY-MM-DD", code=400)
         stmt = stmt.where(TravelRecord.visited_date == d)
         count_stmt = count_stmt.where(TravelRecord.visited_date == d)
     total = db.exec(count_stmt).one()

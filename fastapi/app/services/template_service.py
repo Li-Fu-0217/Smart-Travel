@@ -211,9 +211,13 @@ def admin_list_templates(db: Session, current: int, size: int, keyword: str, day
             cond = cond | (TripTemplate.status == 0)
         stmt = stmt.where(cond)
         count_stmt = count_stmt.where(cond)
+    if day_range and day_range not in ("1-2", "3-4", "5+"):
+        raise BusinessException("天数筛选取值不合法", code=400)
+    if use_range and use_range not in ("1-5", "6+"):
+        raise BusinessException("被使用次数筛选取值不合法", code=400)
     if day_range == "1-2":
-        stmt = stmt.where(TripTemplate.day_count <= 2)
-        count_stmt = count_stmt.where(TripTemplate.day_count <= 2)
+        stmt = stmt.where(TripTemplate.day_count >= 1, TripTemplate.day_count <= 2)
+        count_stmt = count_stmt.where(TripTemplate.day_count >= 1, TripTemplate.day_count <= 2)
     elif day_range == "3-4":
         stmt = stmt.where(TripTemplate.day_count >= 3, TripTemplate.day_count <= 4)
         count_stmt = count_stmt.where(TripTemplate.day_count >= 3, TripTemplate.day_count <= 4)
@@ -221,8 +225,8 @@ def admin_list_templates(db: Session, current: int, size: int, keyword: str, day
         stmt = stmt.where(TripTemplate.day_count >= 5)
         count_stmt = count_stmt.where(TripTemplate.day_count >= 5)
     if use_range == "1-5":
-        stmt = stmt.where(TripTemplate.use_count <= 5)
-        count_stmt = count_stmt.where(TripTemplate.use_count <= 5)
+        stmt = stmt.where(TripTemplate.use_count >= 1, TripTemplate.use_count <= 5)
+        count_stmt = count_stmt.where(TripTemplate.use_count >= 1, TripTemplate.use_count <= 5)
     elif use_range == "6+":
         stmt = stmt.where(TripTemplate.use_count >= 6)
         count_stmt = count_stmt.where(TripTemplate.use_count >= 6)
