@@ -23,6 +23,13 @@ const DICT = {
     handling: ['处理中', 'warn'],
     closed: ['已关闭', 'muted'],
   },
+  alert_type: {
+    lost: ['走失', 'danger'],
+    illness: ['疾病', 'warn'],
+    document: ['证件', 'warn'],
+    accident: ['事故', 'danger'],
+    other: ['其他', 'muted'],
+  },
   signup: {
     registered: ['已报名', 'ok'],
     cancelled: ['已取消', 'muted'],

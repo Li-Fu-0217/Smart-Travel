@@ -63,3 +63,19 @@
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* ===== Element Plus 主色映射（§7.9.11）：组件库变量跟随 token ===== */
+/* theme.css 于 element-plus/dist/index.css 之后引入，此处覆盖 EP 的 :root 默认值 */
+:root {
+  --el-color-primary: var(--accent);
+  --el-color-primary-dark-2: color-mix(in srgb, var(--accent) 80%, #000);
+  --el-color-primary-light-3: color-mix(in srgb, var(--accent) 70%, #fff);
+  --el-color-primary-light-5: color-mix(in srgb, var(--accent) 50%, #fff);
+  --el-color-primary-light-7: color-mix(in srgb, var(--accent) 30%, #fff);
+  --el-color-primary-light-8: color-mix(in srgb, var(--accent) 20%, #fff);
+  --el-color-primary-light-9: color-mix(in srgb, var(--accent) 10%, #fff);
+  --el-color-success: var(--ok);
+  --el-color-warning: var(--warn);
+  --el-color-danger: var(--danger);
+  --el-color-error: var(--danger);
+}

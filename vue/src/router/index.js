@@ -91,7 +91,12 @@ router.beforeEach(async (to) => {
 
 // body 也带 data-scope，让 body 背景色随主题/端变化（§7.9.10）
 router.afterEach((to) => {
-  document.body.setAttribute('data-scope', to.meta.scope === 'admin' ? 'admin' : 'front')
+  const scope = to.meta.scope === 'admin' ? 'admin' : 'front'
+  document.body.setAttribute('data-scope', scope)
+  // 用户从未手动选过主题 → 按端设默认（§7.9.2）；手动选过则不再覆盖
+  if (!localStorage.getItem('travel-assistant-theme')) {
+    document.documentElement.setAttribute('data-theme', scope === 'admin' ? 'ocean-dark' : 'sunset-light')
+  }
 })
 
 export function markDynamicReset() {

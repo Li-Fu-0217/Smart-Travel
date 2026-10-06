@@ -6,19 +6,19 @@ const placeholder = () => import('../views/common/PagePlaceholder.vue')
 export const routeMap = {
   // ===== 后台 14 条（照 sys_menu 原名）=====
   '/admin/dashboard': () => import('../views/admin/dashboard.vue'),
-  '/admin/travelers': placeholder,
-  '/admin/trips': placeholder,
-  '/admin/templates': placeholder,
-  '/admin/bookings': placeholder,
-  '/admin/groups': placeholder,
-  '/admin/alerts': placeholder,
-  '/admin/guides': placeholder,
-  '/admin/records': placeholder,
-  '/admin/agent-tools': placeholder,
-  '/admin/agent-logs': placeholder,
-  '/admin/users': placeholder,
-  '/admin/logs': placeholder,
-  '/admin/menus': placeholder,
+  '/admin/travelers': () => import('../views/admin/TravelerList.vue'),
+  '/admin/trips': () => import('../views/admin/TripList.vue'),
+  '/admin/templates': () => import('../views/admin/TemplateList.vue'),
+  '/admin/bookings': () => import('../views/admin/BookingList.vue'),
+  '/admin/groups': () => import('../views/admin/GroupTourList.vue'),
+  '/admin/alerts': () => import('../views/admin/AlertList.vue'),
+  '/admin/guides': placeholder,      // 阶段 5
+  '/admin/records': () => import('../views/admin/RecordList.vue'),
+  '/admin/agent-tools': placeholder, // 阶段 6
+  '/admin/agent-logs': placeholder,  // 阶段 6
+  '/admin/users': () => import('../views/admin/UserList.vue'),
+  '/admin/logs': () => import('../views/admin/SystemLogList.vue'),
+  '/admin/menus': () => import('../views/admin/MenuList.vue'),
 
   // ===== 前台 11 条（8 导航 + 3 隐藏入口，见 §7.4）=====
   '/user/home': () => import('../views/front/home.vue'),
