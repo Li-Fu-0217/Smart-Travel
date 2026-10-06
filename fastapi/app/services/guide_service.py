@@ -19,10 +19,9 @@ from app.services import vector_store
 CHUNK_SIZE = 280
 CHUNK_OVERLAP = 40
 TOP_K = 5
-# 相关度下限：0.6*向量 + 1.2*关键词 的合并分低于此值视为不贴切。
-# 实测分布：正例「申根签证」强命中 8.64；负例「量子纠缠与外星人签证」仅 1.44~1.76（单「签证」命中 + 向量噪声）。
-# 2.0 落在「≥2 个 n-gram 命中（≥2.4）」与「单命中 + 噪声（≤1.8）」之间。
-MIN_SCORE = 2.0
+# 相关度闸门：2-gram 覆盖率下限。
+# 实测：正例「护照过期了怎么办」覆盖率 1/7≈0.143；负例「量子纠缠与外星人签证」覆盖率 1/9≈0.111。取 0.12 介于两者之间。
+MIN_COVERAGE = 0.12
 
 
 # ===== 切片（段优先，块长约 280、重叠约 40）=====
@@ -55,12 +54,22 @@ def _split_text(text: str) -> List[str]:
 # ===== 关键词 n-gram（权重 1.2）=====
 
 def _keyword_score(query: str, content: str) -> float:
+    """返回命中 n-gram 数（未乘 1.2，权重在 query() 合并处只乘一次）。"""
     score = 0.0
     for n in (2, 3, 4):
         for i in range(len(query) - n + 1):
             if query[i:i + n] in content:
                 score += 1.0
-    return score * 1.2
+    return score
+
+
+def _two_gram_coverage(query: str, content: str) -> float:
+    """2-gram 覆盖率：命中 2-gram 数 / 查询 2-gram 总数，作相关度闸门。"""
+    total = max(0, len(query) - 1)
+    if total == 0:
+        return 0.0
+    matched = sum(1 for i in range(total) if query[i:i + 2] in content)
+    return matched / total
 
 
 # ===== 文件解析 =====
@@ -181,6 +190,7 @@ def query(db: Session, text: str) -> GuideQueryResponseVO:
     doc_titles = {d.id: d.title for d in db.exec(select(GuideDocument)).all()}
 
     kw = {c.id: _keyword_score(text, c.content or "") for c in chunks}
+    cov = {c.id: _two_gram_coverage(text, c.content or "") for c in chunks}
 
     ready, reason = vector_store.detect_model()
     vec = {}
@@ -193,8 +203,10 @@ def query(db: Session, text: str) -> GuideQueryResponseVO:
 
     merged = []
     for c in chunks:
-        total = 0.6 * vec.get(c.id, 0.0) + 1.2 * kw.get(c.id, 0.0)
-        if total >= MIN_SCORE:
+        k = kw.get(c.id, 0.0)
+        # 相关度闸门：至少 1 个 n-gram 命中，且 2-gram 覆盖率达标（替代标量阈值）
+        if k >= 1.0 and cov.get(c.id, 0.0) >= MIN_COVERAGE:
+            total = 0.6 * vec.get(c.id, 0.0) + 1.2 * k
             merged.append((c, total))
     merged.sort(key=lambda x: -x[1])
     hits = [
