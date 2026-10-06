@@ -1,4 +1,5 @@
 """旅途求助服务（见施工规范 §4.5、§5.8）。"""
+import logging
 from typing import List
 
 from sqlmodel import Session, func, select
@@ -6,7 +7,10 @@ from sqlmodel import Session, func, select
 from app.common.exceptions import BusinessException
 from app.models import FamilyMember, SysUser, TravelAlert, TravelerProfile
 from app.schemas.alert import AlertCreateRequest, AlertUpdateRequest, AlertVO
+from app.services import notification_service
 from app.services.family_service import assert_family_access
+
+logger = logging.getLogger(__name__)
 
 
 def _bound_ids(db: Session, user: SysUser) -> List[int]:
@@ -45,6 +49,11 @@ def create_sos(db: Session, user: SysUser, payload: AlertCreateRequest) -> Alert
     db.add(alert)
     db.commit()
     db.refresh(alert)
+    # 通知推送（失败不影响 SOS 主流程，见 §9 阶段 3.6）
+    try:
+        _notify_sos(db, alert)
+    except Exception:
+        logger.exception("SOS 通知写入失败 alert_id=%s", alert.id)
     return to_vo(db, alert)
 
 
@@ -84,3 +93,19 @@ def admin_update_alert(db: Session, alert_id: int, payload: AlertUpdateRequest) 
     db.commit()
     db.refresh(alert)
     return to_vo(db, alert)
+
+
+def _notify_sos(db: Session, alert: TravelAlert) -> None:
+    """按 notify_family / notify_staff 写站内消息（§9 阶段 3.6）。"""
+    if not alert.notify_family and not alert.notify_staff:
+        return
+    title = "旅途求助"
+    content = alert.message or alert.location or "家人发起了求助"
+    if alert.notify_family:
+        uids = db.exec(select(FamilyMember.user_id).where(FamilyMember.traveler_id == alert.traveler_id)).all()
+        for uid in uids:
+            notification_service.push(db, uid, alert.traveler_id, title, content, "alert", alert.source, alert.id)
+    if alert.notify_staff:
+        admin_ids = db.exec(select(SysUser.id).where(SysUser.role == "ADMIN")).all()
+        for uid in admin_ids:
+            notification_service.push(db, uid, alert.traveler_id, title, content, "alert", alert.source, alert.id)
