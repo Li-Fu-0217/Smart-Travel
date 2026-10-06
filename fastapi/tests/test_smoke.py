@@ -3,16 +3,20 @@
 
 def test_readonly_get_smoke(client, admin_headers):
     spec = client.get("/openapi.json").json()
-    non_200 = []
+    non_200 = {}
     for path, methods in spec["paths"].items():
         if "get" in methods and "{" not in path:
             r = client.get(path, headers=admin_headers)
             if r.status_code != 200:
-                non_200.append((path, r.status_code))
-    # 关键不变量：不允许任何 500
-    assert all(s != 500 for _, s in non_200), f"只读 GET 出现 500: {non_200}"
-    # 其余非 200 只能是「缺必填参数」的正当 400（FastAPI 校验）
-    assert all(s == 400 for _, s in non_200), f"出现非 200/400: {non_200}"
+                non_200[path] = r.status_code
+    # 显式列名断言那 3 个「缺必填参数」的正当 400；其余必须全 200（§13 F1）
+    expected_400 = {
+        "/api/files/download",   # 缺 path
+        "/api/files/preview",    # 缺 path
+        "/api/trips/today",      # 缺 travelerId
+    }
+    assert set(non_200.keys()) == expected_400, f"非 200 端点集合不符: {non_200}"
+    assert all(s == 400 for s in non_200.values()), f"出现非 400: {non_200}"
 
 
 def test_guide_retrieval_recall_and_score_bound(client, user_headers):
