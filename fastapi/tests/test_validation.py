@@ -159,3 +159,8 @@ def test_guide_doc_type_whitelist():
         assert False, "doc_type=foo 应被拒"
     except ValidationError:
         pass
+
+
+def test_record_visibility_whitelist(client, user_headers):
+    r = client.post("/api/records", json={"travelerId": 1, "destination": "x", "visibility": 99}, headers=user_headers)
+    assert r.status_code == 400

@@ -14,7 +14,7 @@ class RecordCreateRequest(CamelModel):
     rating: int | None = Field(None, ge=1, le=5)
     content: str | None = Field(None, max_length=1000)
     photos: str | None = Field(None, max_length=1000)
-    visibility: int = 0
+    visibility: int = Field(0, ge=0, le=1)
 
 
 class RecordUpdateRequest(CamelModel):
@@ -24,7 +24,7 @@ class RecordUpdateRequest(CamelModel):
     rating: int | None = Field(None, ge=1, le=5)
     content: str | None = Field(None, max_length=1000)
     photos: str | None = Field(None, max_length=1000)
-    visibility: int | None = None
+    visibility: int | None = Field(None, ge=0, le=1)
 
 
 class RecordVO(CamelModel):
