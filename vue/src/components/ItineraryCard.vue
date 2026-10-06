@@ -50,7 +50,7 @@ defineProps({
 .head-main {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--sp-card-gap);
 }
 .itin-title {
   margin: 0;
@@ -63,7 +63,7 @@ defineProps({
 }
 .itin-days {
   flex-shrink: 0;
-  padding: 2px 10px;
+  padding: 0 var(--sp-card-gap); line-height: 1.8;
   border-radius: var(--r-badge);
   background: var(--accent);
   color: var(--accent-ink);
@@ -80,8 +80,8 @@ defineProps({
 .itin-day {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding-left: 10px;
+  gap: var(--sp-card-gap);
+  padding-left: var(--sp-card-gap);
   border-left: 2px solid var(--line);
 }
 .day-head {
@@ -99,12 +99,12 @@ defineProps({
 }
 .day-items {
   margin: 0;
-  padding-left: 18px;
+  padding-left: var(--sp-card-inner);
   color: var(--muted);
   font-size: var(--fs-aux);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--sp-card-gap);
 }
 .itin-foot {
   display: flex;
@@ -113,7 +113,7 @@ defineProps({
   gap: var(--sp-card-gap);
 }
 .tag {
-  padding: 2px 10px;
+  padding: 0 var(--sp-card-gap); line-height: 1.8;
   border: 1px solid var(--line);
   border-radius: var(--r-badge);
   background: var(--surface);

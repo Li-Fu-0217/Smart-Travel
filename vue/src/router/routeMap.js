@@ -14,8 +14,8 @@ export const routeMap = {
   '/admin/alerts': () => import('../views/admin/AlertList.vue'),
   '/admin/guides': () => import('../views/admin/GuideList.vue'),
   '/admin/records': () => import('../views/admin/RecordList.vue'),
-  '/admin/agent-tools': placeholder, // 阶段 6
-  '/admin/agent-logs': placeholder,  // 阶段 6
+  '/admin/agent-tools': () => import('../views/admin/AgentToolList.vue'),
+  '/admin/agent-logs': () => import('../views/admin/AgentLogList.vue'),
   '/admin/users': () => import('../views/admin/UserList.vue'),
   '/admin/logs': () => import('../views/admin/SystemLogList.vue'),
   '/admin/menus': () => import('../views/admin/MenuList.vue'),

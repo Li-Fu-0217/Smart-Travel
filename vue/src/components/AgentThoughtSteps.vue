@@ -26,7 +26,7 @@ defineProps({
 .step {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--sp-card-gap);
 }
 .step-head {
   display: flex;
@@ -43,14 +43,14 @@ defineProps({
   border-radius: 50%;
   background: var(--accent);
   color: var(--accent-ink);
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 .thought {
   color: var(--muted);
   font-size: var(--fs-aux);
 }
 .action {
-  padding: 0 8px;
+  padding: 0 var(--sp-card-gap);
   border-radius: var(--r-badge);
   background: var(--surface);
   border: 1px solid var(--line);
@@ -59,7 +59,7 @@ defineProps({
 }
 .observation {
   margin: 0;
-  padding-left: 26px;
+  padding-left: var(--sp-card-inner);
   color: var(--muted);
   font-size: var(--fs-aux);
 }

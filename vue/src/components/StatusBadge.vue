@@ -42,6 +42,7 @@ const DICT = {
   template: { 1: ['已发布', 'ok'], 0: ['已下架', 'muted'] },
   visibility: { 1: ['公开', 'ok'], 0: ['仅自己', 'muted'] },
   user: { 1: ['启用', 'ok'], 0: ['禁用', 'danger'] },
+  agent: { 1: ['成功', 'ok'], 0: ['失败', 'danger'] },
 }
 
 const entry = computed(() => DICT[props.type]?.[props.value] || [String(props.value), 'muted'])

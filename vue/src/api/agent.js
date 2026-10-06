@@ -13,3 +13,12 @@ export function getAgentSessions() {
 export function getAgentMessages(sessionId) {
   return request.get(`/agent/sessions/${sessionId}/messages`)
 }
+
+// 管理端（/api/admin/agent/*）
+export function getAgentTools() {
+  return request.get('/admin/agent/tools')
+}
+
+export function getAgentToolLogs(params) {
+  return request.get('/admin/agent/tool-logs', { params })
+}

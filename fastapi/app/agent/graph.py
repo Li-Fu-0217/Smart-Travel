@@ -30,8 +30,6 @@ from app.agent.tools import (
     TOOL_COPY_TRIP_TEMPLATE,
     TOOL_DISTILL_PREFERENCES,
     TOOL_NOTIFY_COMPANIONS,
-    TOOL_QUERY_AVAILABLE_BOOKING,
-    TOOL_QUERY_GUIDE_KNOWLEDGE,
     TOOL_QUERY_TRAVELER_PROFILE,
     TOOL_RECOMMEND_ITINERARY,
     TOOL_SAVE_TRAVEL_RECORD,
@@ -80,17 +78,9 @@ class ItineraryCard(CamelModel):
     tips: str | None = None
 
 
-# 6 个有副作用的写库工具（§6.11）
-_WRITE_TOOLS = {
-    TOOL_BOOK_ITEM,
-    TOOL_NOTIFY_COMPANIONS,
-    TOOL_TRIGGER_TRAVEL_ALERT,
-    TOOL_SAVE_TRAVEL_RECORD,
-    TOOL_DISTILL_PREFERENCES,
-    TOOL_COPY_TRIP_TEMPLATE,
-}
-
 # 需要 traveler_id 的工具（敏感参数兜底补齐用，§6.11）
+# 注：§6.11「写库类工具二次校验」仅在 book_item 上有明确闸门（须已存在待确认上下文，见 wrap_tool_call）。
+# 其余 5 个写库工具被模型/规则链调用本身就是「用户意向明确」的信号，无额外可校验的意图信号，故不另设闸门。
 _TRAVELER_TOOLS = {
     TOOL_QUERY_TRAVELER_PROFILE,
     TOOL_CHECK_TRIP_SCHEDULE,
