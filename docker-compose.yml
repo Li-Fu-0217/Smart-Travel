@@ -33,6 +33,13 @@ services:
       - uploads_data:/app/uploads
       - chroma_data:/app/data/chroma
       - chroma_cache:/root/.cache/chroma/onnx_models
+    healthcheck:
+      # python:3.12-slim 无 curl，用 python urllib 探 /openapi.json
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/openapi.json')"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
     ports:
       - "8000:8000"
 
@@ -42,6 +49,13 @@ services:
       dockerfile: vue/Dockerfile
     depends_on:
       - backend
+    healthcheck:
+      # nginx:alpine 自带 busybox wget
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
     ports:
       - "8080:80"
 

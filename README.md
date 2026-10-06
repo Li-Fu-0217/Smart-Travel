@@ -103,6 +103,7 @@ travel-assistant/
 ```bash
 docker compose up -d --build
 ```
+> 本机若 `docker compose`（Docker CLI 插件）不可用（报 `unknown command: docker compose`），改用独立版 `docker-compose up -d --build`。
 - 前端 http://localhost:8080（nginx 同源反代 /api 到后端）
 - 后端 http://localhost:8000
 - 库名 `travel_assistant_docker`（compose 独立 mysql 卷，**绝不碰宿主机 travel_assistant**）
