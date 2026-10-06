@@ -136,7 +136,15 @@ def list_documents(db: Session, current: int, size: int, keyword: str) -> tuple[
     stmt = select(GuideDocument)
     count_stmt = select(func.count(GuideDocument.id))
     if keyword:
-        cond = GuideDocument.title.contains(keyword) | GuideDocument.destination.contains(keyword)
+        cond = (GuideDocument.title.contains(keyword)
+                | GuideDocument.destination.contains(keyword)
+                | GuideDocument.file_path.contains(keyword)
+                | GuideDocument.doc_type.contains(keyword))
+        # 状态中文标签 → 值映射（§4.6）
+        if "已就绪" in keyword:
+            cond = cond | (GuideDocument.status == 1)
+        if "待向量化" in keyword:
+            cond = cond | (GuideDocument.status == 0)
         stmt = stmt.where(cond)
         count_stmt = count_stmt.where(cond)
     total = db.exec(count_stmt).one()

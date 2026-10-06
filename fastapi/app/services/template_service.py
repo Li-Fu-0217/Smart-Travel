@@ -197,13 +197,35 @@ def copy_template(db: Session, user: SysUser, template_id: int, payload: Templat
     return trip_to_vo(trip)
 
 
-def admin_list_templates(db: Session, current: int, size: int, keyword: str) -> tuple[List[TemplateVO], int]:
+def admin_list_templates(db: Session, current: int, size: int, keyword: str, day_range: str = "", use_range: str = "") -> tuple[List[TemplateVO], int]:
     stmt = select(TripTemplate)
     count_stmt = select(func.count(TripTemplate.id))
     if keyword:
-        cond = TripTemplate.title.contains(keyword) | TripTemplate.destination.contains(keyword)
+        cond = (TripTemplate.title.contains(keyword)
+                | TripTemplate.destination.contains(keyword)
+                | TripTemplate.author_name.contains(keyword))
+        # 状态中文标签 → 值映射（§4.6）：该页无状态下拉，故并入 keyword
+        if "上架" in keyword:
+            cond = cond | (TripTemplate.status == 1)
+        if "下架" in keyword:
+            cond = cond | (TripTemplate.status == 0)
         stmt = stmt.where(cond)
         count_stmt = count_stmt.where(cond)
+    if day_range == "1-2":
+        stmt = stmt.where(TripTemplate.day_count <= 2)
+        count_stmt = count_stmt.where(TripTemplate.day_count <= 2)
+    elif day_range == "3-4":
+        stmt = stmt.where(TripTemplate.day_count >= 3, TripTemplate.day_count <= 4)
+        count_stmt = count_stmt.where(TripTemplate.day_count >= 3, TripTemplate.day_count <= 4)
+    elif day_range == "5+":
+        stmt = stmt.where(TripTemplate.day_count >= 5)
+        count_stmt = count_stmt.where(TripTemplate.day_count >= 5)
+    if use_range == "1-5":
+        stmt = stmt.where(TripTemplate.use_count <= 5)
+        count_stmt = count_stmt.where(TripTemplate.use_count <= 5)
+    elif use_range == "6+":
+        stmt = stmt.where(TripTemplate.use_count >= 6)
+        count_stmt = count_stmt.where(TripTemplate.use_count >= 6)
     total = db.exec(count_stmt).one()
     templates = db.exec(stmt.order_by(TripTemplate.id.desc()).offset((current - 1) * size).limit(size)).all()
     return [to_vo(t) for t in templates], total

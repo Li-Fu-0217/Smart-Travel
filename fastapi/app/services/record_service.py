@@ -1,4 +1,5 @@
 """旅游记录服务（见施工规范 §4.5、§5.8）。"""
+from datetime import date
 from typing import List
 
 from sqlmodel import Session, func, select
@@ -82,16 +83,27 @@ def delete_record(db: Session, user: SysUser, record_id: int) -> None:
     db.commit()
 
 
-def admin_list_records(db: Session, current: int, size: int, traveler_id: int | None, keyword: str) -> tuple[List[RecordVO], int]:
+def admin_list_records(db: Session, current: int, size: int, traveler_id: int | None, keyword: str, rating: int | None = None, visited_date: str = "") -> tuple[List[RecordVO], int]:
     stmt = select(TravelRecord)
     count_stmt = select(func.count(TravelRecord.id))
     if traveler_id:
         stmt = stmt.where(TravelRecord.traveler_id == traveler_id)
         count_stmt = count_stmt.where(TravelRecord.traveler_id == traveler_id)
     if keyword:
-        cond = TravelRecord.destination.contains(keyword) | TravelRecord.content.contains(keyword)
+        stmt = stmt.join(TravelerProfile, TravelRecord.traveler_id == TravelerProfile.id)
+        count_stmt = count_stmt.join(TravelerProfile, TravelRecord.traveler_id == TravelerProfile.id)
+        cond = (TravelRecord.destination.contains(keyword)
+                | TravelRecord.content.contains(keyword)
+                | TravelerProfile.name.contains(keyword))
         stmt = stmt.where(cond)
         count_stmt = count_stmt.where(cond)
+    if rating:
+        stmt = stmt.where(TravelRecord.rating == rating)
+        count_stmt = count_stmt.where(TravelRecord.rating == rating)
+    if visited_date:
+        d = date.fromisoformat(visited_date)
+        stmt = stmt.where(TravelRecord.visited_date == d)
+        count_stmt = count_stmt.where(TravelRecord.visited_date == d)
     total = db.exec(count_stmt).one()
     records = db.exec(stmt.order_by(TravelRecord.id.desc()).offset((current - 1) * size).limit(size)).all()
     return [to_vo(db, r) for r in records], total

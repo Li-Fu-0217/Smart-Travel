@@ -41,10 +41,12 @@ def admin_list_templates(
     current: int = Query(1, ge=1),
     size: int = Query(10, ge=1, le=100),
     keyword: str = Query(""),
+    day_range: str = Query("", alias="dayRange"),
+    use_range: str = Query("", alias="useRange"),
     current_user=Depends(require_admin),
     db: Session = Depends(get_db),
 ):
-    records, total = template_service.admin_list_templates(db, current, size, keyword)
+    records, total = template_service.admin_list_templates(db, current, size, keyword, day_range, use_range)
     return Result(data=PageResult(records=records, total=total, current=current, size=size))
 
 

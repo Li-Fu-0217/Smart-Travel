@@ -1,7 +1,7 @@
 <template>
   <div class="page">
     <div class="toolbar">
-      <el-input v-model="keyword" placeholder="搜索标题" clearable class="search" @keyup.enter="load" @clear="load" />
+      <el-input v-model="keyword" placeholder="搜索标题/文件/类型/状态" clearable class="search" @keyup.enter="load" @clear="load" />
       <el-button type="primary" @click="load">搜索</el-button>
       <el-upload :show-file-list="false" :http-request="doUpload" accept=".txt,.md,.pdf">
         <el-button type="primary">上传文档</el-button>

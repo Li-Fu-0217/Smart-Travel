@@ -1,7 +1,16 @@
 <template>
   <div class="page">
     <div class="toolbar">
-      <el-input v-model="keyword" placeholder="搜索模板标题" clearable class="search" @keyup.enter="load" @clear="load" />
+      <el-input v-model="keyword" placeholder="搜索标题/目的地/作者/状态" clearable class="search" @keyup.enter="load" @clear="load" />
+      <el-select v-model="dayRange" clearable placeholder="天数" class="days" @change="reload">
+        <el-option label="1-2 天" value="1-2" />
+        <el-option label="3-4 天" value="3-4" />
+        <el-option label="5 天以上" value="5+" />
+      </el-select>
+      <el-select v-model="useRange" clearable placeholder="被使用" class="days" @change="reload">
+        <el-option label="1-5 次" value="1-5" />
+        <el-option label="6 次以上" value="6+" />
+      </el-select>
       <el-button type="primary" @click="load">搜索</el-button>
     </div>
     <div class="table-wrap">
@@ -42,17 +51,24 @@ const total = ref(0)
 const current = ref(1)
 const size = ref(10)
 const keyword = ref('')
+const dayRange = ref('')
+const useRange = ref('')
 const loading = ref(false)
 
 async function load() {
   loading.value = true
   try {
-    const data = await getAdminTemplates({ current: current.value, size: size.value, keyword: keyword.value })
+    const data = await getAdminTemplates({ current: current.value, size: size.value, keyword: keyword.value, dayRange: dayRange.value, useRange: useRange.value })
     rows.value = data.records
     total.value = data.total
   } finally {
     loading.value = false
   }
+}
+
+function reload() {
+  current.value = 1
+  load()
 }
 
 async function toggleStatus(row) {
@@ -75,6 +91,7 @@ onMounted(load)
 .page { display: flex; flex-direction: column; gap: var(--sp-card-gap); }
 .toolbar { display: flex; gap: var(--sp-card-gap); align-items: center; }
 .search { width: 220px; }
+.days { width: 120px; }
 .table-wrap { overflow-x: auto; }
 .pager { display: flex; justify-content: flex-end; }
 </style>

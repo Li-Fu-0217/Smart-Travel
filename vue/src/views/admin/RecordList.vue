@@ -1,7 +1,11 @@
 <template>
   <div class="page">
     <div class="toolbar">
-      <el-input v-model="keyword" placeholder="搜索目的地" clearable class="search" @keyup.enter="load" @clear="load" />
+      <el-input v-model="keyword" placeholder="搜索目的地/内容/旅行者" clearable class="search" @keyup.enter="load" @clear="load" />
+      <el-select v-model="rating" clearable placeholder="评分" class="rating" @change="reload">
+        <el-option v-for="n in 5" :key="n" :label="`${n} 星`" :value="n" />
+      </el-select>
+      <el-date-picker v-model="visitedDate" type="date" value-format="YYYY-MM-DD" placeholder="到访日期" class="date" @change="reload" />
       <el-button type="primary" @click="load">搜索</el-button>
     </div>
     <div class="table-wrap">
@@ -39,17 +43,24 @@ const total = ref(0)
 const current = ref(1)
 const size = ref(10)
 const keyword = ref('')
+const rating = ref(null)
+const visitedDate = ref('')
 const loading = ref(false)
 
 async function load() {
   loading.value = true
   try {
-    const data = await getAdminRecords({ current: current.value, size: size.value })
+    const data = await getAdminRecords({ current: current.value, size: size.value, keyword: keyword.value, rating: rating.value || undefined, visitedDate: visitedDate.value || undefined })
     rows.value = data.records
     total.value = data.total
   } finally {
     loading.value = false
   }
+}
+
+function reload() {
+  current.value = 1
+  load()
 }
 
 async function confirmDelete(row) {
@@ -66,6 +77,8 @@ onMounted(load)
 .page { display: flex; flex-direction: column; gap: var(--sp-card-gap); }
 .toolbar { display: flex; gap: var(--sp-card-gap); align-items: center; }
 .search { width: 220px; }
+.rating { width: 110px; }
+.date { width: 150px; }
 .table-wrap { overflow-x: auto; }
 .pager { display: flex; justify-content: flex-end; }
 </style>
