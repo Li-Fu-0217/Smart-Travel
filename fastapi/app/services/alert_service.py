@@ -4,6 +4,7 @@ from typing import List
 
 from sqlmodel import Session, func, select
 
+from app.common.constants import ALERT_STATUS
 from app.common.exceptions import BusinessException
 from app.models import FamilyMember, SysUser, TravelAlert, TravelerProfile
 from app.schemas.alert import AlertCreateRequest, AlertUpdateRequest, AlertVO
@@ -64,6 +65,8 @@ def list_alerts(db: Session, user: SysUser, current: int, size: int, status: str
         ids = _bound_ids(db, user)
         stmt = stmt.where(TravelAlert.traveler_id.in_(ids))
         count_stmt = count_stmt.where(TravelAlert.traveler_id.in_(ids))
+    if status and status not in ALERT_STATUS:
+        raise BusinessException("求助状态取值不合法", code=400)
     if status:
         stmt = stmt.where(TravelAlert.status == status)
         count_stmt = count_stmt.where(TravelAlert.status == status)
@@ -75,6 +78,8 @@ def list_alerts(db: Session, user: SysUser, current: int, size: int, status: str
 def admin_list_alerts(db: Session, current: int, size: int, status: str | None, keyword: str) -> tuple[List[AlertVO], int]:
     stmt = select(TravelAlert)
     count_stmt = select(func.count(TravelAlert.id))
+    if status and status not in ALERT_STATUS:
+        raise BusinessException("求助状态取值不合法", code=400)
     if status:
         stmt = stmt.where(TravelAlert.status == status)
         count_stmt = count_stmt.where(TravelAlert.status == status)

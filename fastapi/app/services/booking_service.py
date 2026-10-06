@@ -9,7 +9,7 @@ from typing import List, Optional
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, func, select
 
-from app.common.constants import SOURCES
+from app.common.constants import BOOKING_STATUS, ITEM_TYPES, SOURCES
 from app.common.exceptions import BusinessException
 from app.models import BookingCatalog, BookingOrder, FamilyMember, SysUser
 from app.schemas.booking import (
@@ -140,6 +140,8 @@ def admin_delete_catalog(db: Session, catalog_id: int) -> None:
 
 def slots(db: Session, item_type: Optional[str], days: int) -> List[BookingSlotVO]:
     days = max(1, min(days, 30))
+    if item_type and item_type not in ITEM_TYPES:
+        raise BusinessException("预约项目类型不合法", code=400)
     stmt = select(BookingCatalog).where(BookingCatalog.status == 1)
     if item_type:
         stmt = stmt.where(BookingCatalog.item_type == item_type)
@@ -214,6 +216,8 @@ def list_orders(db: Session, user: SysUser, current: int, size: int, status: Opt
         ids = _bound_ids(db, user)
         stmt = stmt.where(BookingOrder.traveler_id.in_(ids))
         count_stmt = count_stmt.where(BookingOrder.traveler_id.in_(ids))
+    if status and status not in BOOKING_STATUS:
+        raise BusinessException("预约状态取值不合法", code=400)
     if status:
         stmt = stmt.where(BookingOrder.status == status)
         count_stmt = count_stmt.where(BookingOrder.status == status)
@@ -246,6 +250,8 @@ def cancel_order(db: Session, user: SysUser, order_id: int) -> BookingOrderVO:
 def admin_list_orders(db: Session, current: int, size: int, status: Optional[str]) -> tuple[List[BookingOrderVO], int]:
     stmt = select(BookingOrder)
     count_stmt = select(func.count(BookingOrder.id))
+    if status and status not in BOOKING_STATUS:
+        raise BusinessException("预约状态取值不合法", code=400)
     if status:
         stmt = stmt.where(BookingOrder.status == status)
         count_stmt = count_stmt.where(BookingOrder.status == status)

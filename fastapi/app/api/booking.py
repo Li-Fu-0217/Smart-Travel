@@ -30,7 +30,7 @@ def list_catalog(current_user=Depends(get_current_user), db: Session = Depends(g
 @router.get("/slots")
 def slots(
     item_type: str | None = Query(None, alias="itemType"),
-    days: int = Query(7),
+    days: int = Query(7, ge=1, le=30),
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
