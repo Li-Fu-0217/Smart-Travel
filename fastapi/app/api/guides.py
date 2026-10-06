@@ -1,8 +1,9 @@
 """攻略库接口（见施工规范 §4.5、§5 RAG）。"""
 from fastapi import APIRouter, Depends, Query, Request
-from pydantic import Field
+from pydantic import Field, field_validator
 from sqlmodel import Session
 
+from app.common.constants import DOC_TYPES
 from app.common.result import CamelModel, PageResult, Result
 from app.core.deps import get_current_user, get_db, operation_log, require_admin
 from app.services import guide_service
@@ -20,6 +21,13 @@ class GuideDocumentCreateRequest(CamelModel):
     file_path: str = Field(..., min_length=1, max_length=255)
     doc_type: str = Field(..., min_length=1, max_length=20)
     destination: str | None = None
+
+    @field_validator("doc_type")
+    @classmethod
+    def _check_doc_type(cls, v: str) -> str:
+        if v not in DOC_TYPES:
+            raise ValueError("攻略文档类型不合法")
+        return v
 
 
 @router.post("/query")

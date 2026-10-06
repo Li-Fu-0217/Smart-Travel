@@ -127,3 +127,35 @@ def test_traveler_body_empty_name(client, user_headers):
 def test_record_body_invalid_rating(client, user_headers):
     r = client.post("/api/records", json={"travelerId": 1, "destination": "x", "rating": 9}, headers=user_headers)
     assert r.status_code == 400  # rating ge=1 le=5 → 422 → 400
+
+
+# ===== F4 缺口修复：role / status / doc_type 白名单 =====
+
+def test_user_role_whitelist_create(client, admin_headers):
+    r = client.post("/api/users", json={"username": "zz", "password": "p", "role": "zzz"}, headers=admin_headers)
+    assert r.status_code == 400
+
+def test_user_role_whitelist_update(client, admin_headers):
+    r = client.put("/api/users/1", json={"role": "x"}, headers=admin_headers)
+    assert r.status_code == 400
+
+def test_traveler_status_whitelist(client, user_headers):
+    r = client.post("/api/travelers", json={"name": "n", "status": 7}, headers=user_headers)
+    assert r.status_code == 400
+
+def test_template_status_whitelist(client, admin_headers):
+    r = client.put("/api/admin/templates/1", json={"status": 7}, headers=admin_headers)
+    assert r.status_code == 400
+
+def test_tour_status_whitelist(client, admin_headers):
+    r = client.post("/api/admin/tours", json={"title": "t", "status": 7}, headers=admin_headers)
+    assert r.status_code == 400
+
+def test_guide_doc_type_whitelist():
+    from pydantic import ValidationError
+    from app.api.guides import GuideDocumentCreateRequest
+    try:
+        GuideDocumentCreateRequest(title="x", file_path="seed/x.txt", doc_type="foo")
+        assert False, "doc_type=foo 应被拒"
+    except ValidationError:
+        pass

@@ -15,6 +15,12 @@ class BookingCatalogCreateRequest(CamelModel):
     duration_minutes: int | None = None
     price: Decimal | None = None
     status: int = 1
+    @field_validator("status")
+    @classmethod
+    def _check_status(cls, v: int | None) -> int | None:
+        if v is not None and v not in (0, 1):
+            raise ValueError("状态取值不合法")
+        return v
 
     @field_validator("item_type")
     @classmethod
@@ -31,6 +37,12 @@ class BookingCatalogUpdateRequest(CamelModel):
     duration_minutes: int | None = None
     price: Decimal | None = None
     status: int | None = None
+    @field_validator("status")
+    @classmethod
+    def _check_status(cls, v: int | None) -> int | None:
+        if v is not None and v not in (0, 1):
+            raise ValueError("状态取值不合法")
+        return v
 
     @field_validator("item_type")
     @classmethod

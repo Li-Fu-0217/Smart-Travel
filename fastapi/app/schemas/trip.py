@@ -18,6 +18,12 @@ class TripCreateRequest(CamelModel):
     budget: Decimal | None = None
     remark: str | None = Field(None, max_length=500)
     status: int = 1
+    @field_validator("status")
+    @classmethod
+    def _check_status(cls, v: int | None) -> int | None:
+        if v is not None and v not in (0, 1):
+            raise ValueError("状态取值不合法")
+        return v
 
 
 class TripUpdateRequest(CamelModel):
@@ -28,6 +34,12 @@ class TripUpdateRequest(CamelModel):
     budget: Decimal | None = None
     remark: str | None = Field(None, max_length=500)
     status: int | None = None
+    @field_validator("status")
+    @classmethod
+    def _check_status(cls, v: int | None) -> int | None:
+        if v is not None and v not in (0, 1):
+            raise ValueError("状态取值不合法")
+        return v
 
 
 class TripVO(CamelModel):

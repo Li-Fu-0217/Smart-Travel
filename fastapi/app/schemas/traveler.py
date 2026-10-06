@@ -21,6 +21,12 @@ class TravelerCreateRequest(CamelModel):
     emergency_contact: str | None = Field(None, max_length=50)
     emergency_phone: str | None = Field(None, max_length=20)
     status: int = 1
+    @field_validator("status")
+    @classmethod
+    def _check_status(cls, v: int | None) -> int | None:
+        if v is not None and v not in (0, 1):
+            raise ValueError("状态取值不合法")
+        return v
 
 
 class TravelerUpdateRequest(CamelModel):
@@ -36,6 +42,12 @@ class TravelerUpdateRequest(CamelModel):
     emergency_contact: str | None = Field(None, max_length=50)
     emergency_phone: str | None = Field(None, max_length=20)
     status: int | None = None
+    @field_validator("status")
+    @classmethod
+    def _check_status(cls, v: int | None) -> int | None:
+        if v is not None and v not in (0, 1):
+            raise ValueError("状态取值不合法")
+        return v
 
 
 class TravelerVO(CamelModel):

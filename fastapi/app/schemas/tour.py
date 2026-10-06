@@ -1,7 +1,7 @@
 """拼团活动出入参（见施工规范 §4.5、§5.8）。"""
 from datetime import datetime
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from app.common.result import CamelModel, DateTimeStr
 
@@ -14,6 +14,12 @@ class TourCreateRequest(CamelModel):
     end_time: datetime | None = None
     capacity: int = Field(0, ge=0)
     status: int = 1
+    @field_validator("status")
+    @classmethod
+    def _check_status(cls, v: int | None) -> int | None:
+        if v is not None and v not in (0, 1):
+            raise ValueError("状态取值不合法")
+        return v
 
 
 class TourUpdateRequest(CamelModel):
@@ -24,6 +30,12 @@ class TourUpdateRequest(CamelModel):
     end_time: datetime | None = None
     capacity: int | None = Field(None, ge=0)
     status: int | None = None
+    @field_validator("status")
+    @classmethod
+    def _check_status(cls, v: int | None) -> int | None:
+        if v is not None and v not in (0, 1):
+            raise ValueError("状态取值不合法")
+        return v
 
 
 class SignupRequest(CamelModel):

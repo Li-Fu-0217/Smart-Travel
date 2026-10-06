@@ -2,7 +2,7 @@
 from datetime import date
 from typing import List
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from app.common.result import CamelModel, DateTimeStr
 
@@ -22,6 +22,12 @@ class TemplateUpdateRequest(CamelModel):
     title: str | None = Field(None, max_length=100)
     description: str | None = Field(None, max_length=500)
     status: int | None = None
+    @field_validator("status")
+    @classmethod
+    def _check_status(cls, v: int | None) -> int | None:
+        if v is not None and v not in (0, 1):
+            raise ValueError("状态取值不合法")
+        return v
 
 
 class TemplateItemVO(CamelModel):
