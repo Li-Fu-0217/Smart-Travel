@@ -19,6 +19,10 @@ from app.services import vector_store
 CHUNK_SIZE = 280
 CHUNK_OVERLAP = 40
 TOP_K = 5
+# 相关度下限：0.6*向量 + 1.2*关键词 的合并分低于此值视为不贴切。
+# 实测分布：正例「申根签证」强命中 8.64；负例「量子纠缠与外星人签证」仅 1.44~1.76（单「签证」命中 + 向量噪声）。
+# 2.0 落在「≥2 个 n-gram 命中（≥2.4）」与「单命中 + 噪声（≤1.8）」之间。
+MIN_SCORE = 2.0
 
 
 # ===== 切片（段优先，块长约 280、重叠约 40）=====
@@ -190,7 +194,7 @@ def query(db: Session, text: str) -> GuideQueryResponseVO:
     merged = []
     for c in chunks:
         total = 0.6 * vec.get(c.id, 0.0) + 1.2 * kw.get(c.id, 0.0)
-        if total > 0:
+        if total >= MIN_SCORE:
             merged.append((c, total))
     merged.sort(key=lambda x: -x[1])
     hits = [

@@ -36,12 +36,19 @@ def detect_model() -> tuple[bool, str]:
         if not d.exists():
             _model_ready, _model_reason = False, f"嵌入模型未下载（{d} 不存在）"
         else:
-            names = {f.name for f in d.iterdir()}
-            ok = "config.json" in names and any(n.endswith((".onnx", ".bin")) for n in names)
-            if ok:
+            # 主判据：Chroma 把模型解压在 onnx/ 子目录（顶层只有 onnx/ 目录 + onnx.tar.gz）
+            onnx_model = d / "onnx" / "model.onnx"
+            onnx_config = d / "onnx" / "config.json"
+            if onnx_model.exists() and onnx_config.exists():
                 _model_ready, _model_reason = True, ""
             else:
-                _model_ready, _model_reason = False, f"嵌入模型未下载完整（{len(names)} 个文件）"
+                # 兼容顶层解压（部分版本把文件直接放在顶层）
+                top_weights = any(f.name.endswith((".onnx", ".bin")) for f in d.iterdir() if f.is_file())
+                top_config = (d / "config.json").exists()
+                if top_weights and top_config:
+                    _model_ready, _model_reason = True, ""
+                else:
+                    _model_ready, _model_reason = False, "嵌入模型不完整（onnx/model.onnx 不存在）"
         logger.info("嵌入模型可用=%s %s", _model_ready, _model_reason)
         return _model_ready, _model_reason
 
