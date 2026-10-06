@@ -118,3 +118,9 @@
   --el-border-color-lighter: var(--line);
   --el-disabled-bg-color: var(--surface-2);
 }
+
+/* 弹窗/确认框表面色：EP .el-dialog 自声明同名变量会盖掉 scope 继承，须用后代选择器直接压过（§8 避坑 36） */
+[data-scope="front"] .el-dialog { --el-dialog-bg-color: var(--surface); }
+[data-scope="admin"] .el-dialog { --el-dialog-bg-color: var(--surface); }
+[data-scope="front"] .el-message-box { background-color: var(--surface); }
+[data-scope="admin"] .el-message-box { background-color: var(--surface); }
