@@ -38,6 +38,7 @@
 
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
 import { agentChat, getAgentMessages } from '../../api/agent'
 import { getSessionId, setSessionId, clearSessionId } from '../../utils/agentTools'
 import AgentThoughtSteps from '../../components/AgentThoughtSteps.vue'
@@ -48,6 +49,7 @@ const input = ref('')
 const loading = ref(false)
 const sessionId = ref('')
 const msgBox = ref(null)
+const route = useRoute()
 
 async function sendText(text) {
   const t = (text || '').trim()
@@ -106,6 +108,9 @@ onMounted(async () => {
       sessionId.value = ''
     }
   }
+  // 首页搜索入口 / 目的地卡跳转携带 ?q=，自动发起一句提问
+  const q = route.query.q
+  if (q) sendText(String(q))
 })
 </script>
 
