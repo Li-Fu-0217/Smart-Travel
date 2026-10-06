@@ -19,11 +19,18 @@
             <span class="muted">已用 {{ t.useCount }} 次</span>
           </div>
           <div class="meta">{{ t.destination }} · {{ t.dayCount }} 天 · {{ t.authorName }}</div>
-          <el-button type="primary" class="copy" @click="copy(t)">一键复制</el-button>
+          <div class="card-actions">
+            <el-button type="primary" class="copy" @click="copy(t)">一键复制</el-button>
+            <el-button class="detail" @click="showDetail(t)">查看详情</el-button>
+          </div>
         </div>
       </div>
       <p v-if="!filtered.length" class="muted">暂无匹配模板</p>
     </div>
+
+    <el-dialog v-model="detailVisible" title="行程详情" width="560px">
+      <ItineraryCard :card="detailCard" />
+    </el-dialog>
 
     <el-dialog v-model="copyVisible" title="复制行程" width="340px">
       <el-form label-width="90px">
@@ -44,9 +51,11 @@
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getTemplates, copyTemplate } from '../../api/template'
+import { getTemplates, copyTemplate, getTemplate } from '../../api/template'
 import { getMyTravelers } from '../../api/family'
 import { destinationTheme } from '../../config/destinationThemes'
+import ItineraryCard from '../../components/ItineraryCard.vue'
+import { templateToCard } from '../../utils/agentTools'
 
 const router = useRouter()
 const templates = ref([])
@@ -57,6 +66,8 @@ const dayRange = ref('')
 const copyVisible = ref(false)
 const copyTravelerId = ref(0)
 const copyStartDate = ref('')
+const detailVisible = ref(false)
+const detailCard = ref(null)
 let curTemplate = null
 
 const filtered = computed(() => {
@@ -85,6 +96,12 @@ function copy(t) {
   copyTravelerId.value = travelers.value.length ? travelers.value[0].id : 0
   copyStartDate.value = ''
   copyVisible.value = true
+}
+
+async function showDetail(t) {
+  const detail = await getTemplate(t.id)
+  detailCard.value = templateToCard(detail)
+  detailVisible.value = true
 }
 
 async function doCopy() {

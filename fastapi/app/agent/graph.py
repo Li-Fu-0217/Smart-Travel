@@ -7,12 +7,44 @@ LangChain 仅提供标准件（ChatOpenAI / StructuredTool / 消息类型 / crea
   - SYSTEM_PROMPT（§6.8）
   - build_agent()：create_agent(llm, tools, system_prompt=SYSTEM_PROMPT,
     middleware=[...], checkpointer=MemorySaver(), name="travel_react")
-  - 中间件（§6.11）：写库工具二次校验 + 每轮用量统计 + traveler_id 兜底（按 LangChain 1.x 真实 API）
+  - TravelAgentMiddleware（§6.11）：写库工具二次校验 + 每轮用量统计 + traveler_id 兜底
   - _extract_steps()：从消息轨迹还原「思考 → 行动 → 观察」步骤（§6.7）
-  - 行程卡片结构化抽取（§6.12）：ItineraryCard 模型 + 按需 with_structured_output
-
-编排/中间件/步骤抽取的落地在阶段 6.1；本文件 6.0 先落 SYSTEM_PROMPT 与结构契约。
+  - ItineraryCard + extract_card()：行程卡片按需结构化抽取（§6.12）
 """
+from __future__ import annotations
+
+import json
+import time
+from typing import Any
+
+from langchain.agents import create_agent
+from langchain.agents.middleware import AgentMiddleware
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
+from langgraph.checkpoint.memory import MemorySaver
+from pydantic import BaseModel, Field
+
+from app.agent.observation_format import format_observation
+from app.agent.tools import (
+    TOOL_BOOK_ITEM,
+    TOOL_CHECK_TRIP_SCHEDULE,
+    TOOL_COPY_TRIP_TEMPLATE,
+    TOOL_DISTILL_PREFERENCES,
+    TOOL_NOTIFY_COMPANIONS,
+    TOOL_QUERY_AVAILABLE_BOOKING,
+    TOOL_QUERY_GUIDE_KNOWLEDGE,
+    TOOL_QUERY_TRAVELER_PROFILE,
+    TOOL_RECOMMEND_ITINERARY,
+    TOOL_SAVE_TRAVEL_RECORD,
+    TOOL_TRIGGER_TRAVEL_ALERT,
+)
+from app.common.result import CamelModel
+
+# 进程内短时记忆，按 thread_id 隔离（§6.1）；单进程 uvicorn 足够
+_checkpointer = MemorySaver()
+
+# 递归步数上限（§6.1 硬性护栏）
+RECURSION_LIMIT = 12
+
 
 # —— 系统提示词（§6.8：必须写清工具使用规则）——
 SYSTEM_PROMPT = """你是「智能旅行助手」，通过调用工具为绑定旅行者的用户办理行程相关事务。
@@ -30,3 +62,163 @@ SYSTEM_PROMPT = """你是「智能旅行助手」，通过调用工具为绑定�
 10. 用户说「按模板复制成行程」时调用 copy_trip_template
 
 需要 traveler_id 时，用消息前缀里标注的「当前旅行者ID」。"""
+
+
+# —— 结构化输出模型（§6.12）——
+class ItineraryDay(CamelModel):
+    day_index: int
+    title: str
+    items: list[str] = []
+
+
+class ItineraryCard(CamelModel):
+    title: str
+    destination: str
+    day_count: int
+    days: list[ItineraryDay] = []
+    tags: list[str] = []
+    tips: str | None = None
+
+
+# 6 个有副作用的写库工具（§6.11）
+_WRITE_TOOLS = {
+    TOOL_BOOK_ITEM,
+    TOOL_NOTIFY_COMPANIONS,
+    TOOL_TRIGGER_TRAVEL_ALERT,
+    TOOL_SAVE_TRAVEL_RECORD,
+    TOOL_DISTILL_PREFERENCES,
+    TOOL_COPY_TRIP_TEMPLATE,
+}
+
+# 需要 traveler_id 的工具（敏感参数兜底补齐用，§6.11）
+_TRAVELER_TOOLS = {
+    TOOL_QUERY_TRAVELER_PROFILE,
+    TOOL_CHECK_TRIP_SCHEDULE,
+    TOOL_BOOK_ITEM,
+    TOOL_NOTIFY_COMPANIONS,
+    TOOL_TRIGGER_TRAVEL_ALERT,
+    TOOL_RECOMMEND_ITINERARY,
+    TOOL_SAVE_TRAVEL_RECORD,
+    TOOL_DISTILL_PREFERENCES,
+    TOOL_COPY_TRIP_TEMPLATE,
+}
+
+
+class TravelAgentMiddleware(AgentMiddleware):
+    """§6.11 中间件：承担三件事（仅模型编排路径生效；工具级埋点仍在 execute_tool）。"""
+
+    def __init__(self, traveler_id: int | None = None, pending_getter=None):
+        self.traveler_id = traveler_id
+        self._pending_getter = pending_getter or (lambda: None)
+        self.usage = {"tool_calls": 0, "total_ms": 0, "input_tokens": 0, "output_tokens": 0}
+        self._t0: float | None = None
+
+    # 1) 每轮用量统计：总耗时
+    def before_agent(self, state, runtime) -> dict | None:
+        self._t0 = time.perf_counter()
+        return None
+
+    def after_agent(self, state, runtime) -> dict | None:
+        if self._t0 is not None:
+            self.usage["total_ms"] = int((time.perf_counter() - self._t0) * 1000)
+        return None
+
+    # 2) 每轮用量统计：模型 token（能拿到就记）
+    def after_model(self, state, runtime) -> dict | None:
+        try:
+            msgs = state.get("messages", []) if isinstance(state, dict) else getattr(state, "messages", [])
+            if msgs:
+                um = getattr(msgs[-1], "usage_metadata", None) or {}
+                self.usage["input_tokens"] += int(um.get("input_tokens") or 0)
+                self.usage["output_tokens"] += int(um.get("output_tokens") or 0)
+        except Exception:  # noqa: BLE001 —— 统计失败不影响主流程
+            pass
+        return None
+
+    # 3) 写库二次校验 + traveler_id 兜底 + 工具调用计数
+    def wrap_tool_call(self, request, handler):
+        tc = request.tool_call
+        name = tc.get("name") or tc["name"]
+        args = dict(tc.get("args") or {})
+        self.usage["tool_calls"] += 1
+
+        # 敏感参数兜底补齐：traveler_id 缺失时从会话上下文补全（§6.11）
+        if name in _TRAVELER_TOOLS and not args.get("traveler_id") and self.traveler_id:
+            args["traveler_id"] = self.traveler_id
+            request = request.override(tool_call={**tc, "args": args})
+
+        # 写库类工具二次校验：book_item 必须已存在待确认上下文，否则拦下、不落库（§6.11）
+        if name == TOOL_BOOK_ITEM and not self._pending_getter():
+            return ToolMessage(
+                content=json.dumps(
+                    {"error": "尚未取得用户对预约时段的明确确认，请先把可选时段展示给用户，等用户点选后再下单"},
+                    ensure_ascii=False,
+                ),
+                tool_call_id=tc.get("id") or tc["id"],
+                name=name,
+            )
+        return handler(request)
+
+
+def build_agent(llm, tools, middleware: list[AgentMiddleware]):
+    """用 create_agent 装配 ReAct 图（§6.1）。recursion_limit 在 invoke 的 config 里传。"""
+    return create_agent(
+        llm,
+        tools,
+        system_prompt=SYSTEM_PROMPT,
+        middleware=middleware,
+        checkpointer=_checkpointer,
+        name="travel_react",
+    )
+
+
+def _extract_steps(messages: list[BaseMessage]) -> list[dict]:
+    """从消息轨迹还原前端可展示的思考步骤（§6.7）。只解析最后一条 HumanMessage 之后的部分。"""
+    steps: list[dict] = []
+    round_no = 0
+    start = 0
+    for i in range(len(messages) - 1, -1, -1):
+        if messages[i].__class__.__name__ == "HumanMessage":
+            start = i + 1
+            break
+
+    for msg in messages[start:]:
+        if isinstance(msg, AIMessage) and msg.tool_calls:
+            for tc in msg.tool_calls:
+                round_no += 1
+                steps.append({
+                    "round": round_no,
+                    "thought": msg.content or f"调用工具 {tc['name']}",
+                    "action": tc["name"],
+                    "observation": "",
+                })
+        elif isinstance(msg, ToolMessage):
+            brief = format_observation(msg.content, getattr(msg, "name", ""))
+            for s in reversed(steps):
+                if s.get("action") == getattr(msg, "name", None) and not s.get("observation"):
+                    s["observation"] = brief
+                    break
+            else:
+                if steps and not steps[-1].get("observation"):
+                    steps[-1]["observation"] = brief
+        elif isinstance(msg, AIMessage) and msg.content and not msg.tool_calls:
+            round_no += 1
+            steps.append({"round": round_no, "thought": "整理答复给您", "action": None, "observation": "已生成办理结果说明"})
+    return steps
+
+
+def _final_reply(messages: list[BaseMessage]) -> str:
+    """最终回复取最后一条不含 tool_calls 的 AIMessage.content（§6.7）。"""
+    for msg in reversed(messages):
+        if isinstance(msg, AIMessage) and msg.content and not msg.tool_calls:
+            return str(msg.content)
+    return ""
+
+
+def extract_card(llm, context: str) -> ItineraryCard | None:
+    """按需二次结构化抽取（§6.12）：仅当本轮轨迹含 recommend_itinerary / copy_trip_template 时调用。
+    抽取失败返回 None，绝不让整轮对话失败。"""
+    try:
+        return llm.with_structured_output(ItineraryCard).invoke(context)
+    except Exception:  # noqa: BLE001 —— 降级：纯文本回复照常返回
+        return None
