@@ -1,0 +1,45 @@
+services:
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      # 独立库名（不是宿主机正在用的 travel_assistant）——见 §13 F3 红线
+      MYSQL_DATABASE: travel_assistant_docker
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: .
+      dockerfile: fastapi/Dockerfile
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: travel_assistant_docker
+      DB_USER: root
+      DB_PASSWORD: root
+      JWT_SECRET: change-me-in-prod
+      AGENT_DEMO_MODE: "true"
+      LLM_API_KEY: ""
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: vue/Dockerfile
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  mysql_data:

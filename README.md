@@ -98,6 +98,17 @@ travel-assistant/
 
 > ⚠️ 前端必须连着后端跑，单独打开 `dist` 产物接口会全部 404。
 
+## Docker Compose 部署（推荐）
+
+```bash
+docker compose up -d --build
+```
+- 前端 http://localhost:8080（nginx 同源反代 /api 到后端）
+- 后端 http://localhost:8000
+- 库名 `travel_assistant_docker`（compose 独立 mysql 卷，**绝不碰宿主机 travel_assistant**）
+
+⚠️ 首次启动会在**容器内**执行 `sql/system.sql`（22 张表 DROP + CREATE + 种子），数据存于 `mysql_data` 卷。
+
 ## 部署要点
 
 - **必须同源反代 `/api`**：静态部署时把 `/api` 反向代理到后端 8000，否则产物里所有接口 404（实测挂静态服务时 `/api/auth/captcha` 就是 404）。

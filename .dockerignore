@@ -1,0 +1,17 @@
+.git
+.gitignore
+.idea
+.vscode
+*.md
+ai操作记录.md
+docs/
+fastapi/.venv
+fastapi/__pycache__
+fastapi/.mypy_cache
+fastapi/.pytest_cache
+fastapi/uploads
+fastapi/data/chroma
+fastapi/tests
+fastapi/requirements-dev.txt
+vue/node_modules
+vue/dist
