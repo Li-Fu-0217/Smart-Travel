@@ -78,6 +78,7 @@ travel-assistant/
 ## 部署步骤
 
 1. **初始化数据库**：`mysql -u root -p < sql/system.sql`（可重复执行，幂等）。
+   ⚠️ **该脚本会对 22 张表 `DROP TABLE`，是清空操作**，不要在已有数据的库上随手执行。
 2. **后端**：
    ```bash
    cd fastapi
@@ -94,6 +95,14 @@ travel-assistant/
    npm run dev                 # http://localhost:5173（/api 代理到 8000）
    ```
 4. 浏览器访问 `http://localhost:5173/login`。
+
+> ⚠️ 前端必须连着后端跑，单独打开 `dist` 产物接口会全部 404。
+
+## 部署要点
+
+- **必须同源反代 `/api`**：静态部署时把 `/api` 反向代理到后端 8000，否则产物里所有接口 404（实测挂静态服务时 `/api/auth/captcha` 就是 404）。
+- **必须配 SPA 回退**：`try_files $uri $uri/ /index.html`，否则刷新与深链接 404。
+- **不要**为部署改 `baseURL` 或引入 `.env`，保持零配置。
 
 ## 默认账号
 
