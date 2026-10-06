@@ -33,7 +33,7 @@ async def business_exception_handler(request: Request, exc: BusinessException):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    msg = translate_validation_errors(exc.errors())
+    msg = translate_validation_errors(list(exc.errors()))
     return JSONResponse(
         status_code=400,
         content=Result(code=400, message=msg).model_dump(by_alias=True),

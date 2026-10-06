@@ -1,6 +1,6 @@
 """行程服务（见施工规范 §4.1、§4.5、§4.11、§5.2）。"""
 from datetime import date, datetime, time, timedelta
-from typing import List, Optional
+from typing import List
 
 from sqlmodel import Session, delete, func, select
 
@@ -37,7 +37,7 @@ def to_vo(t: TripPlan) -> TripVO:
 
 
 def _bound_ids(db: Session, user: SysUser) -> List[int]:
-    return db.exec(select(FamilyMember.traveler_id).where(FamilyMember.user_id == user.id)).all()
+    return list(db.exec(select(FamilyMember.traveler_id).where(FamilyMember.user_id == user.id)).all())
 
 
 def list_trips(db: Session, user: SysUser, current: int, size: int, keyword: str) -> tuple[List[TripVO], int]:

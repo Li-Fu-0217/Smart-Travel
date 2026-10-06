@@ -23,17 +23,9 @@ from app.agent import graph, memory
 from app.agent.memory import ROLE_ASSISTANT, ROLE_SYSTEM, ROLE_USER
 from app.agent.observation_format import format_observation
 from app.agent.tools import (
-    TOOL_BOOK_ITEM,
-    TOOL_CHECK_TRIP_SCHEDULE,
     TOOL_COPY_TRIP_TEMPLATE,
-    TOOL_DISTILL_PREFERENCES,
-    TOOL_NOTIFY_COMPANIONS,
     TOOL_QUERY_AVAILABLE_BOOKING,
-    TOOL_QUERY_GUIDE_KNOWLEDGE,
-    TOOL_QUERY_TRAVELER_PROFILE,
     TOOL_RECOMMEND_ITINERARY,
-    TOOL_SAVE_TRAVEL_RECORD,
-    TOOL_TRIGGER_TRAVEL_ALERT,
     build_tools,
     execute_tool,
 )
@@ -266,7 +258,7 @@ def _model_history_messages(db: Session, user: SysUser, session_id: str, exclude
     if exclude_last:
         history = history[:-1]
     history = history[-20:]
-    out = []
+    out: list = []
     for h in history:
         if h["role"] == ROLE_USER:
             out.append(HumanMessage(content=h["content"]))
@@ -308,7 +300,7 @@ def _run_model(db: Session, user: SysUser, session_id: str, traveler_id: int | N
         for m in messages:
             if isinstance(m, ToolMessage) and getattr(m, "name", "") == TOOL_QUERY_AVAILABLE_BOOKING:
                 try:
-                    data = json.loads(m.content)
+                    data = json.loads(str(m.content))
                 except (json.JSONDecodeError, TypeError):
                     data = None
                 p = _first_catalog_pending(data)
@@ -345,7 +337,7 @@ def chat(db: Session, user: SysUser, message: str, session_id: str | None) -> di
         try:
             out = _run_model(db, user, session_id, traveler_id, injected)
             engine = "langgraph"
-        except Exception as exc:  # noqa: BLE001 —— 异常降级（§6.4），不出现 500
+        except Exception:  # noqa: BLE001 —— 异常降级（§6.4），不出现 500
             logger.exception("模型编排失败，降级为规则编排 session=%s", session_id)
             out = _run_demo(db, user, session_id, traveler_id, message)
             out["reply"] = "刚才智能编排暂时不可用，已切换为本地助手继续为您办理。\n\n" + out["reply"]

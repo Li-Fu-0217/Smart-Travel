@@ -1,5 +1,5 @@
 """日志接口（见施工规范 §4.5，管理员）。"""
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request
 from sqlmodel import Session
@@ -20,6 +20,8 @@ def list_logs(
     current_user=Depends(require_admin),
     db: Session = Depends(get_db),
 ):
+    records: list = []
+    total: int = 0
     if type == "login":
         records, total = log_service.list_login_logs(db, current, size)
     elif type == "operation":
@@ -33,8 +35,8 @@ def list_logs(
 @operation_log("系统日志", "批量删除日志")
 def batch_delete_logs(
     type: str = Query("login"),
-    ids: List[int] = None,
-    request: Request = None,
+    ids: Optional[List[int]] = None,
+    request: Request = None,  # type: ignore[assignment]
     current_user=Depends(require_admin),
     db: Session = Depends(get_db),
 ):

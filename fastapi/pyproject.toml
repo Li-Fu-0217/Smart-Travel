@@ -1,0 +1,21 @@
+# 后端静态检查配置（阶段 F2，见 §13）
+# 口径：mypy 只开 check_untyped_defs，三方库 ignore_missing_imports，不开 strict；
+#       ruff 只开 F + E9（真错误），import 排序 I 单列一次提交，不混入逻辑修改。
+
+[tool.mypy]
+python_version = "3.12"
+check_untyped_defs = true
+ignore_missing_imports = true
+plugins = ["pydantic.mypy"]
+# 压制 SQLModel/SQLAlchemy 泛型推断噪音（§13 F2 口径）：
+#   union-attr / attr-defined —— SQLModel 主键是 Optional[int]，Column 的 .contains/.in_/.desc 被 mypy 误判
+#   call-overload / arg-type —— func.count(Model.id)、.where/.join/.order_by 的 SQLAlchemy 宽松类型
+# 真问题（未定义名/参数不符/返回类型不符）在代码层已修完，这些码只在 SQLModel 查询里出现。
+disable_error_code = ["union-attr", "attr-defined", "call-overload", "arg-type", "operator"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["F", "E9"]

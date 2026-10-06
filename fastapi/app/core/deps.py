@@ -4,7 +4,7 @@ import time
 from functools import wraps
 from typing import Optional
 
-from fastapi import Depends, Request
+from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlmodel import Session, select
 

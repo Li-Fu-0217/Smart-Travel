@@ -4,7 +4,6 @@
 近 7 日折线图的补零逻辑在后端显式写（不依赖前端补）。
 """
 from datetime import date, timedelta
-from typing import List
 
 from sqlmodel import Session, func, select
 

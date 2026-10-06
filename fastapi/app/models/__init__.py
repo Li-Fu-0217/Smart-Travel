@@ -76,4 +76,4 @@ class SysOperationLog(SQLModel, table=True):
 
 
 # 业务表（17 张）映射，见 models/travel.py（阶段 3）
-from app.models.travel import *  # noqa: E402, F401
+from app.models.travel import *  # noqa: E402, F401, F403

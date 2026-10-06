@@ -11,7 +11,7 @@ from app.services.family_service import assert_family_access
 
 
 def _bound_ids(db: Session, user: SysUser) -> List[int]:
-    return db.exec(select(FamilyMember.traveler_id).where(FamilyMember.user_id == user.id)).all()
+    return list(db.exec(select(FamilyMember.traveler_id).where(FamilyMember.user_id == user.id)).all())
 
 
 def to_vo(db: Session, r: TravelRecord) -> RecordVO:

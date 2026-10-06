@@ -25,7 +25,7 @@ def _model_dir() -> Path:
     return Path.home() / ".cache" / "chroma" / "onnx_models" / "all-MiniLM-L6-v2"
 
 
-def detect_model() -> tuple[bool, str]:
+def detect_model() -> tuple[bool | None, str]:
     """探测嵌入模型是否可用（只做一次并缓存）。"""
     global _model_ready, _model_reason, _detected
     with _lock:

@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def _bound_ids(db: Session, user: SysUser) -> List[int]:
-    return db.exec(select(FamilyMember.traveler_id).where(FamilyMember.user_id == user.id)).all()
+    return list(db.exec(select(FamilyMember.traveler_id).where(FamilyMember.user_id == user.id)).all())
 
 
 def to_vo(db: Session, a: TravelAlert) -> AlertVO:
@@ -111,5 +111,6 @@ def _notify_sos(db: Session, alert: TravelAlert) -> None:
             notification_service.push(db, uid, alert.traveler_id, title, content, "alert", alert.source, alert.id)
     if alert.notify_staff:
         admin_ids = db.exec(select(SysUser.id).where(SysUser.role == "ADMIN")).all()
-        for uid in admin_ids:
-            notification_service.push(db, uid, alert.traveler_id, title, content, "alert", alert.source, alert.id)
+        for admin_uid in admin_ids:
+            if admin_uid is not None:
+                notification_service.push(db, admin_uid, alert.traveler_id, title, content, "alert", alert.source, alert.id)

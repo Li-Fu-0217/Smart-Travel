@@ -53,7 +53,7 @@ def to_profile_vo(t: TravelerProfile) -> TravelerProfileVO:
 
 
 def _bound_ids(db: Session, user: SysUser) -> List[int]:
-    return db.exec(select(FamilyMember.traveler_id).where(FamilyMember.user_id == user.id)).all()
+    return list(db.exec(select(FamilyMember.traveler_id).where(FamilyMember.user_id == user.id)).all())
 
 
 def list_travelers(db: Session, user: SysUser, current: int, size: int, keyword: str) -> tuple[List[TravelerVO], int]:

@@ -1,5 +1,5 @@
 """菜单服务（见施工规范 §4.5、§4.7）。"""
-from typing import List
+from typing import List, Optional
 
 from sqlmodel import Session, select
 
@@ -22,7 +22,7 @@ def to_vo(menu: SysMenu) -> MenuVO:
     )
 
 
-def list_menus(db: Session, role: str = None) -> List[MenuVO]:
+def list_menus(db: Session, role: Optional[str] = None) -> List[MenuVO]:
     menus = db.exec(select(SysMenu).order_by(SysMenu.sort_order)).all()
     if role:
         menus = [m for m in menus if role in (m.roles or "").split(",")]

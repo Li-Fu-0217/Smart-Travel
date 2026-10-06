@@ -15,13 +15,11 @@ from __future__ import annotations
 
 import json
 import time
-from typing import Any
 
 from langchain.agents import create_agent
 from langchain.agents.middleware import AgentMiddleware
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
+from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
 from langgraph.checkpoint.memory import MemorySaver
-from pydantic import BaseModel, Field
 
 from app.agent.observation_format import format_observation
 from app.agent.tools import (
@@ -183,7 +181,7 @@ def _extract_steps(messages: list[BaseMessage]) -> list[dict]:
                     "observation": "",
                 })
         elif isinstance(msg, ToolMessage):
-            brief = format_observation(msg.content, getattr(msg, "name", ""))
+            brief = format_observation(str(msg.content), getattr(msg, "name", ""))
             for s in reversed(steps):
                 if s.get("action") == getattr(msg, "name", None) and not s.get("observation"):
                     s["observation"] = brief

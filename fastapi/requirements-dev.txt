@@ -2,3 +2,7 @@
 # 版本钉死理由：pytest 8.3 是当前稳定主版本，pytest.exit() 等 API 稳定；
 # 钉小版本是为了复现一致行为，避免将来自动升级引入测试行为差异。
 pytest==8.3.4
+
+# 静态检查（F2）：mypy 钉 2.4.0（check_untyped_defs + pydantic 插件，压制 SQLModel 泛型噪音）；ruff 钉 0.16.10（只开 F + E9）
+mypy==2.4.0
+ruff==0.16.10

@@ -67,7 +67,7 @@ def to_order_vo(db: Session, o: BookingOrder) -> BookingOrderVO:
 
 
 def _bound_ids(db: Session, user: SysUser) -> List[int]:
-    return db.exec(select(FamilyMember.traveler_id).where(FamilyMember.user_id == user.id)).all()
+    return list(db.exec(select(FamilyMember.traveler_id).where(FamilyMember.user_id == user.id)).all())
 
 
 def _validate_slot(slot: str) -> datetime:

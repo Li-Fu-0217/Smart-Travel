@@ -1,0 +1,52 @@
+# CI（阶段 F2，见 §13）：MySQL 8 service container + pytest 连跑两次 + ruff + mypy。
+# 注意：.env 是 gitignored，CI 用环境变量注入 DB_*/JWT_SECRET（pydantic-settings 里环境变量优先于 .env）。
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      # 显式 pin 编码：本地 locale 可能是 cp936，子进程/终端编码不一致会让测试变成环境相关（见 F1 尾巴）
+      PYTHONIOENCODING: utf-8
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_NAME: travel_assistant_test
+      DB_USER: root
+      DB_PASSWORD: root
+      JWT_SECRET: ci-test-secret
+    defaults:
+      run:
+        working-directory: fastapi
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 安装依赖
+        run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: 建测试库
+        run: python tests/create_test_db.py
+      - name: pytest 连跑两次（守住 F1 的可重复运行）
+        run: |
+          python -m pytest tests/ -q
+          python -m pytest tests/ -q
+      - name: ruff（F + E9）
+        run: python -m ruff check .
+      - name: mypy（check_untyped_defs + 压制 SQLModel 泛型噪音）
+        run: python -m mypy app
