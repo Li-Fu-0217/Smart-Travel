@@ -22,16 +22,16 @@ export const routeMap = {
 
   // ===== 前台 11 条（8 导航 + 3 隐藏入口，见 §7.4）=====
   '/user/home': () => import('../views/front/home.vue'),
-  '/user/dashboard': placeholder,
-  '/user/trips': placeholder,
-  '/user/today': placeholder,
-  '/user/templates': placeholder,
-  '/user/bookings': placeholder,
-  '/user/groups': placeholder,
-  '/user/chat': placeholder,
-  '/user/traveler-detail': placeholder,   // TravelerDetail（看板卡片点入）
-  '/user/records': placeholder,           // MyRecords（看板入口点入）
-  '/user/notifications': placeholder,     // UserNotifications（消息铃铛点入）
+  '/user/dashboard': () => import('../views/front/TravelerDashboard.vue'),
+  '/user/trips': () => import('../views/front/TripPlanner.vue'),
+  '/user/today': () => import('../views/front/TripToday.vue'),
+  '/user/templates': () => import('../views/front/TripTemplates.vue'),
+  '/user/bookings': () => import('../views/front/UserBookings.vue'),
+  '/user/groups': () => import('../views/front/UserGroups.vue'),
+  '/user/chat': () => import('../views/front/AgentChat.vue'),
+  '/user/traveler-detail': () => import('../views/front/TravelerDetail.vue'),
+  '/user/records': () => import('../views/front/MyRecords.vue'),
+  '/user/notifications': () => import('../views/front/UserNotifications.vue'),
 
   // ===== 隐藏页 =====
   '/user/403': () => import('../views/error/403.vue'),

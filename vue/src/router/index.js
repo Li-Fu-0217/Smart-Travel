@@ -3,6 +3,15 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '../store/user'
 import { getToken } from '../utils/auth'
 import { setupDynamicRoutes, resetDynamicRoutes } from './dynamicRoutes'
+import { routeMap } from './routeMap'
+
+// 前台路由写死（§7.2）：8 导航 + 3 隐藏入口
+const FRONT_ROUTES = [
+  ['home', '首页'], ['dashboard', '关怀看板'], ['trips', '行程规划'],
+  ['today', '今日行程'], ['templates', '行程模板'], ['bookings', '服务中心'],
+  ['groups', '活动天地'], ['chat', '智能助手'], ['traveler-detail', '档案详情'],
+  ['records', '我的记录'], ['notifications', '消息中心'],
+]
 
 const routes = [
   { path: '/login', name: 'Login', component: () => import('../views/login/Login.vue') },
@@ -27,14 +36,12 @@ const routes = [
     name: 'FrontLayout',
     component: () => import('../layout/FrontLayout.vue'),
     meta: { scope: 'user' },
-    children: [
-      {
-        path: 'home',
-        name: 'UserHome',
-        component: () => import('../views/front/home.vue'),
-        meta: { title: '首页' },
-      },
-    ],
+    children: FRONT_ROUTES.map(([p, title]) => ({
+      path: p,
+      name: 'User-' + p,
+      component: routeMap['/user/' + p],
+      meta: { title },
+    })),
   },
   { path: '/user/403', name: 'User403', component: () => import('../views/error/403.vue'), meta: { scope: 'user' } },
   { path: '/', redirect: '/login' },
