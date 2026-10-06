@@ -34,11 +34,11 @@ function handleLogout() {
 
 <style scoped>
 .front-layout { min-height: 100%; background: var(--bg); color: var(--ink); font-family: var(--font-sans); }
-.topbar { display: flex; align-items: center; gap: 16px; padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--line); }
-.brand { font-family: var(--font-serif); font-size: 22px; font-weight: 600; }
-.nav { display: flex; gap: 8px; flex-wrap: wrap; }
-.nav-item { padding: 10px 12px; border-radius: 999px; color: var(--muted); }
+.topbar { display: flex; align-items: center; gap: var(--sp-card-inner); padding: var(--sp-card-gap) var(--sp-card-inner); background: var(--surface); border-bottom: 1px solid var(--line); }
+.brand { font-family: var(--font-serif); font-size: var(--fs-h2); font-weight: 600; }
+.nav { display: flex; gap: var(--sp-card-gap); flex-wrap: wrap; }
+.nav-item { padding: var(--sp-card-gap); border-radius: var(--r-btn-pill); color: var(--muted); }
 .nav-item.router-link-active { background: var(--surface-2); color: var(--accent); }
 .logout { margin-left: auto; color: var(--danger); cursor: pointer; }
-.content { padding: 16px; }
+.content { padding: var(--sp-card-inner); }
 </style>

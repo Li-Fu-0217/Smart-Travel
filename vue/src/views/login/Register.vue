@@ -1,5 +1,5 @@
 <template>
-  <div class="register-page">
+  <div class="register-page" data-scope="front">
     <div class="register-card">
       <h1>注册账号</h1>
       <el-form @submit.prevent>
@@ -59,9 +59,9 @@ onMounted(refreshCaptcha)
 
 <style scoped>
 .register-page { display: flex; align-items: center; justify-content: center; min-height: 100%; background: var(--bg); }
-.register-card { width: 360px; max-width: 90vw; background: var(--surface); padding: 32px; border-radius: 18px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
-h1 { font-family: var(--font-serif); font-size: 28px; text-align: center; margin: 0 0 24px; color: var(--ink); }
-.captcha-row { display: flex; gap: 8px; width: 100%; }
-.captcha-img { height: 44px; width: 120px; border-radius: 8px; cursor: pointer; border: 1px solid var(--line); }
+.register-card { width: 360px; max-width: 90vw; background: var(--surface); padding: var(--sp-card-lg); border-radius: var(--r-card-lg); box-shadow: var(--shadow-card); }
+h1 { font-family: var(--font-serif); font-size: var(--fs-h1); text-align: center; margin: 0 0 var(--sp-section); color: var(--ink); }
+.captcha-row { display: flex; gap: var(--sp-card-gap); width: 100%; }
+.captcha-img { height: 44px; width: 120px; border-radius: var(--r-card); cursor: pointer; border: 1px solid var(--line); }
 .submit { width: 100%; }
 </style>

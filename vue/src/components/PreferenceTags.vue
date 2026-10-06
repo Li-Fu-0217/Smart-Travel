@@ -42,8 +42,11 @@ function toggle(tag) {
   gap: var(--sp-card-gap);
 }
 .tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: var(--min-tap);
-  padding: 6px 14px;
+  padding: 0 var(--sp-card-gap);
   border: 1px solid var(--line);
   border-radius: var(--r-badge);
   background: var(--surface);

@@ -47,11 +47,11 @@ onMounted(async () => {
 
 <style scoped>
 .admin-layout { display: flex; height: 100%; background: var(--bg); color: var(--ink); }
-.sidebar { width: 200px; background: var(--surface); border-right: 1px solid var(--line); padding: 16px; }
-.brand-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.sidebar { width: 200px; background: var(--surface); border-right: 1px solid var(--line); padding: var(--sp-card-inner); }
+.brand-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-card-inner); }
 .brand { font-weight: 600; }
-.nav-item { display: block; padding: 10px 12px; border-radius: 8px; color: var(--muted); }
+.nav-item { display: block; padding: var(--sp-card-gap); border-radius: var(--r-card); color: var(--muted); }
 .nav-item.router-link-active { background: var(--surface-2); color: var(--accent); }
-.logout { margin-top: 24px; cursor: pointer; color: var(--danger); }
-.content { flex: 1; overflow: auto; padding: 20px; }
+.logout { margin-top: var(--sp-section); cursor: pointer; color: var(--danger); }
+.content { flex: 1; overflow: auto; padding: var(--sp-section); }
 </style>

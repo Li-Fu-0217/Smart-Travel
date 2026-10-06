@@ -9,6 +9,6 @@
 </script>
 
 <style scoped>
-.placeholder h2 { margin: 0 0 8px; font-size: 20px; }
+.placeholder h2 { margin: 0 0 var(--sp-card-gap); font-size: var(--fs-h1); }
 .muted { color: var(--muted); }
 </style>

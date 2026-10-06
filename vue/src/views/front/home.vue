@@ -9,6 +9,6 @@
 </script>
 
 <style scoped>
-.home h1 { font-family: var(--font-serif); font-size: 28px; }
+.home h1 { font-family: var(--font-serif); font-size: var(--fs-h1); }
 .muted { color: var(--muted); }
 </style>

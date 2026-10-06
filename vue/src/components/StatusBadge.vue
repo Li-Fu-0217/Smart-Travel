@@ -45,11 +45,11 @@ const tone = computed(() => entry.value[1])
 <style scoped>
 .status-badge {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 0 var(--sp-card-gap);
   border-radius: var(--r-badge);
   font-size: var(--fs-caption);
   font-family: var(--font-sans);
-  line-height: 1.6;
+  line-height: 1.8;
   border: 1px solid currentColor;
 }
 .tone-ok { color: var(--ok); }

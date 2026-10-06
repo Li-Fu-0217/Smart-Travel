@@ -89,6 +89,11 @@ router.beforeEach(async (to) => {
   return true
 })
 
+// body 也带 data-scope，让 body 背景色随主题/端变化（§7.9.10）
+router.afterEach((to) => {
+  document.body.setAttribute('data-scope', to.meta.scope === 'admin' ? 'admin' : 'front')
+})
+
 export function markDynamicReset() {
   dynamicReady = false
   resetDynamicRoutes(router)
